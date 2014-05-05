@@ -6,7 +6,7 @@
  * Description: A well-designed plugin that helps track the Adjusted Bounce Rate in Google Analytics.
  *
  * Plugin URI: http://wordpress.org/extend/plugins/adjusted-bounce-rate/
- * Version: 0.9
+ * Version: 0.9.1
  * Author: Grant K Norwood
  * Author URI: http://grantnorwood.com/
  * License: GPLv2
@@ -42,7 +42,7 @@ class Adjusted_Bounce_Rate {
 	/**
 	 * This plugin's version
 	 */
-	const VERSION = '0.9';
+	const VERSION = '0.9.1';
 
 
 
@@ -266,30 +266,17 @@ class Adjusted_Bounce_Rate {
         ?>
 
         <!-- adjusted bounce rate -->
+        <script type="text/javascript" src="<?php echo plugins_url(Adjusted_Bounce_Rate::ID) ?>/js/<?php echo Adjusted_Bounce_Rate::ID; ?>.js?v=<?php echo self::VERSION ?>"></script>
         <script type="text/javascript">
-            (function (tos) {
-                if (typeof pageTracker !== "undefined" || typeof _gaq !== "undefined") {
-                    window.setInterval(function () {
-                        tos = (function (t) {
-                            return t[0] == 50 ? (parseInt(t[1]) + 1) + ':00' : (t[1] || '0') + ':' + (parseInt(t[0]) + 10);
-                        })(tos.split(':').reverse());
-                        window.pageTracker
-                            ? pageTracker._trackEvent(
-                                '<?php echo $this->options['engagement_event_category'] ?>',
-                                '<?php echo $this->options['engagement_event_action'] ?>',
-                                tos)
-                            : _gaq.push([
-                                '_trackEvent',
-                                '<?php echo $this->options['engagement_event_category'] ?>',
-                                '<?php echo $this->options['engagement_event_action'] ?>',
-                                tos
-                            ]);
-                        console.log('Adjusted Bounce Rate: <?php echo $this->options['engagement_event_category'] ?>, <?php echo $this->options['engagement_event_action'] ?>, ' + tos)
-                    }, <?php echo (int)$this->options['engagement_interval_seconds'] * 1000 ?>);
-                } else {
-                    console.log('Adjusted Bounce Rate: GA is not loaded.');
-                }
-            })('00');
+            jQuery(document).ready(function() {
+                gkn.AdjustedBounceRate.init({
+                    engagement_interval_seconds: <?php echo $this->options['engagement_interval_seconds']; ?>,
+                    min_engagement_seconds: <?php echo $this->options['min_engagement_seconds']; ?>,
+                    max_engagement_seconds: <?php echo $this->options['max_engagement_seconds']; ?>,
+                    engagement_event_category: '<?php echo $this->options['engagement_event_category']; ?>',
+                    engagement_event_action: '<?php echo $this->options['engagement_event_action']; ?>'
+                });
+            });
         </script>
         <!-- end adjusted bounce rate -->
 

@@ -186,7 +186,7 @@ class Adjusted_Bounce_Rate_Settings_Page extends Adjusted_Bounce_Rate {
             'engagement_interval_seconds' => array(
                 'section' => 'tracking_intervals',
                 'label' => __("Engagement Interval", self::ID),
-                'text' => __("The number of seconds in between engagement tracking events are generated.", self::ID),
+                'text' => __("The number of seconds in between engagement tracking events.", self::ID),
                 'type' => 'int',
             ),
             'min_engagement_seconds' => array(

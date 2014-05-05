@@ -72,5 +72,11 @@ panel.
 
 == Changelog ==
 
-= 0.9 (2014-04-29) =
+= 0.9.1 (2014-05-05) =
+* Total rewrite to better handle advanced features.
+* Now handles minimum and maximum engagement time.
+* Custom event category and action variables added.
+* Debug mode and better console logging added.
+
+= 0.9.0 (2014-04-29) =
 * Beta release.
