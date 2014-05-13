@@ -14,13 +14,15 @@ A well-designed plugin that helps track the Adjusted Bounce Rate in Google Analy
 Google Analytics does not properly track some important engagement metrics like Avg Time on Site, Avg Session Duration, and Bounce Rate.  This plugin uses a commonly-accepted JavaScript method of improving the accuracy of these stats.
 
 This plugin addresses the issues as identified by the Google Analytics team at:
-* http://analytics.blogspot.com/2012/07/tracking-adjusted-bounce-rate-in-google.html
+
+* <http://analytics.blogspot.com/2012/07/tracking-adjusted-bounce-rate-in-google.html>
 
 Others have also blogged about their own solutions at:
-* http://padicode.com/blog/analytics/the-real-bounce-rate/
-* http://briancray.com/posts/time-on-site-bounce-rate-get-the-real-numbers-in-google-analytics
 
-See http://grantnorwood.com/wordpress/plugins/adjusted-bounce-rate/ for more information about the plugin and the author, or visit the GitHub repo at https://github.com/grantnorwood/adjusted-bounce-rate to fork my code or submit an issue.
+* <http://padicode.com/blog/analytics/the-real-bounce-rate/>
+* <http://briancray.com/posts/time-on-site-bounce-rate-get-the-real-numbers-in-google-analytics>
+
+See <http://grantnorwood.com/wordpress/plugins/adjusted-bounce-rate/> for more information about the plugin and the author, or visit the GitHub repo at <https://github.com/grantnorwood/adjusted-bounce-rate> to fork my code or submit an issue.
 
 = Features =
 
@@ -38,7 +40,7 @@ were loaded, or if they are disabled because of the currently logged in user's r
 
 == Installation ==
 
-1. Download the zip file from WordPress plugin site: http://wordpress.org/extend/plugins/adjusted-bounce-rate/
+1. Download the zip file from WordPress plugin site: <http://wordpress.org/extend/plugins/adjusted-bounce-rate/>
 1. Unzip the file.
 1. Upload your plugin directory to your server's `/wp-content/plugins/` directory.
 1. Activate the plugin using WordPress' admin interface:
@@ -61,7 +63,7 @@ panel.
 
 = Where can I submit bugs or request new features? =
 
-Create an issue on the GitHub repo at [https://github.com/grantnorwood/adjusted-bounce-rate](https://github.com/grantnorwood/adjusted-bounce-rate).
+Create an issue on the GitHub repo at <https://github.com/grantnorwood/adjusted-bounce-rate>.
 
 
 == Screenshots ==
