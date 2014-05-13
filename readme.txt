@@ -6,7 +6,7 @@ Requires at least: 3.5
 Tested up to: 3.9
 Stable tag: 1.0.0
 
-A well-designed plugin that helps track the Adjusted Bounce Rate in Google Analytics, and improve accuracy of time on page, time on site, and bounce rate metrics.
+A well-designed plugin that helps track the Adjusted Bounce Rate in Google Analytics, and improve accuracy of certain engagement metrics.
 
 
 == Description ==
@@ -62,6 +62,11 @@ panel.
 = Where can I submit bugs or request new features? =
 
 Create an issue on the GitHub repo at [https://github.com/grantnorwood/adjusted-bounce-rate](https://github.com/grantnorwood/adjusted-bounce-rate).
+
+
+== Screenshots ==
+
+1. Screen shot of the options page.
 
 
 == Changelog ==

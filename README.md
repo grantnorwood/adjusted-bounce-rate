@@ -1,6 +1,6 @@
 # Adjusted Bounce Rate <br>WordPress Plugin
 
-A well-designed plugin that helps track the Adjusted Bounce Rate in Google Analytics, and improve accuracy of time on page, time on site, and bounce rate metrics.
+A well-designed plugin that helps track the Adjusted Bounce Rate in Google Analytics, and improve accuracy of certain engagement metrics.
 
 ## Description
 
