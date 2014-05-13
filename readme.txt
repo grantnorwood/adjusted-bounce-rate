@@ -3,8 +3,8 @@ Contributors: grantnorwood
 Donate link: http://grantnorwood.com/
 Tags: google analytics, analytics, bounce rate, avg time on page, avg time on site
 Requires at least: 3.5
-Tested up to: 3.9
-Stable tag: 1.0.0
+Tested up to: 3.9.1
+Stable tag: 1.0.1
 
 A well-designed plugin that helps track the Adjusted Bounce Rate in Google Analytics, and improve accuracy of certain engagement metrics.
 
@@ -72,6 +72,9 @@ Create an issue on the GitHub repo at <https://github.com/grantnorwood/adjusted-
 
 
 == Changelog ==
+
+= 1.0.1 (2014-05-13) =
+* Fixed issue when detecting if Yoast's Google Analytics for WordPress plugin is active.
 
 = 1.0.0 (2014-05-13) =
 * Initial public release.
