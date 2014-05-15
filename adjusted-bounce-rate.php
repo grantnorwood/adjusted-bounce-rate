@@ -6,7 +6,7 @@
  * Description: A well-designed plugin that helps track the Adjusted Bounce Rate in Google Analytics.
  *
  * Plugin URI: http://wordpress.org/extend/plugins/adjusted-bounce-rate/
- * Version: 1.1.0
+ * Version: 1.1.1
  * Author: Grant K Norwood
  * Author URI: http://grantnorwood.com/
  * License: GPLv2
@@ -24,7 +24,7 @@ $GLOBALS['adjusted_bounce_rate'] = new Adjusted_Bounce_Rate;
  * @package adjusted-bounce-rate
  * @link http://wordpress.org/extend/plugins/adjusted-bounce-rate/
  * @license http://www.gnu.org/licenses/gpl-2.0.html GPLv2
- * @author Grant K Norwood
+ * @author Grant K Norwood (http://grantnorwood.com)
  * @copyright Grant K Norwood, 2014
  */
 class Adjusted_Bounce_Rate {
@@ -42,7 +42,7 @@ class Adjusted_Bounce_Rate {
 	/**
 	 * This plugin's version
 	 */
-	const VERSION = '1.1.0';
+	const VERSION = '1.1.1';
 
 
 
@@ -82,6 +82,7 @@ class Adjusted_Bounce_Rate {
         'engagement_event_category' => 'engagement-hit',
         'engagement_event_action' => 'time-on-page',
         'code_placement' => 'footer', //"header" or "footer"
+        'minify_js' => true,
 	);
 
 	/**
@@ -269,10 +270,13 @@ class Adjusted_Bounce_Rate {
      */
     public function render_code() {
 
+        $minify_js = (bool) $this->options["minify_js"];
+        $js_url = plugins_url(Adjusted_Bounce_Rate::ID) . "/js/" . Adjusted_Bounce_Rate::ID . ($minify_js ? ".min" : "") . ".js?v=" . self::VERSION;
+
         ?>
 
         <!-- adjusted bounce rate -->
-        <script type="text/javascript" src="<?php echo plugins_url(Adjusted_Bounce_Rate::ID) ?>/js/<?php echo Adjusted_Bounce_Rate::ID; ?>.js?v=<?php echo self::VERSION ?>"></script>
+        <script type="text/javascript" src="<?php echo $js_url; ?>"></script>
         <script type="text/javascript">
             jQuery(document).ready(function() {
                 gkn.AdjustedBounceRate.init({

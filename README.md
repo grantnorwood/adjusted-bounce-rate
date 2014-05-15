@@ -22,6 +22,7 @@ considered abandoned.  (Defaults to 20 mins.)
 1. Set the minimum engagement time, which can be used to set an initial amount of time
 required to count the user has having engaged.  (Defaults to 10 secs.)
 1. Customize the event Category, Action and Label names to be displayed in Google Analytics.
+1. Create goals in Google Analytics based on the time on page. (GA goals only support session duration by default!)
 1. Uses either the old pageTracker code, the newer asynchronous code, or the newest Universal Analytics code.
 1. Choose header or footer placement for the code.
 1. Compatible with Yoast's Google Analytics for WordPress. For example, detects if analytics
@@ -62,6 +63,11 @@ Create an issue on the GitHub repo at [https://github.com/grantnorwood/adjusted-
 
 
 ## Changelog
+
+### 1.1.1 (2014-05-15)
+* Added leading zero to minutes so that they sort better in Google Analytics.
+* Added total number of elapsed seconds as the GA event's value so that GA goals can be created to measure time on page.
+* Minified javascript for performance.
 
 ### 1.1.0 (2014-05-15)
 * Added compatibility with Ajaxify (https://github.com/browserstate/ajaxify).

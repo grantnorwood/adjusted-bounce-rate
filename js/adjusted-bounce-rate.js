@@ -28,7 +28,9 @@ if (typeof gkn === 'undefined' || !gkn) {
     gkn.AdjustedBounceRate = function() {
 
         //Private properties.
-        var debugMode = true,
+        var version = '1.1.1',
+            debugMode = true, //if true, output helpful debug messages and such
+            sandboxMode = false, //if true, do NOT actually fire the tracking event (disable in production!)
             options = {},
             startTime,
             elapsedTime,
@@ -195,29 +197,32 @@ if (typeof gkn === 'undefined' || !gkn) {
                     }
                 }
 
+                if (!sandboxMode) {
+                    if (gaTracking == 'pageTracker') {
 
-                if (gaTracking == 'pageTracker') {
+                        pageTracker._trackEvent(
+                            options.engagement_event_category,
+                            options.engagement_event_action,
+                            elapsedTime,
+                            elapsedSecs || 0
+                        );
 
-                    pageTracker._trackEvent(
-                        options.engagement_event_category,
-                        options.engagement_event_action,
-                        elapsedTime
-                    );
+                    } else if (gaTracking == '_gaq') {
 
-                } else if (gaTracking == '_gaq') {
+                        _gaq.push([
+                            '_trackEvent',
+                            options.engagement_event_category,
+                            options.engagement_event_action,
+                            elapsedTime,
+                            elapsedSecs || 0
+                        ]);
 
-                    _gaq.push([
-                        '_trackEvent',
-                        options.engagement_event_category,
-                        options.engagement_event_action,
-                        elapsedTime
-                    ]);
+                    } else {
 
-                } else {
+                        //No supported analytics script loaded.
+                        debug.warn('Adjusted_Bounce_Rate: [warning] No supported version of Google Analytics script seems to be loaded.');
 
-                    //No supported analytics script loaded.
-                    debug.warn('Adjusted_Bounce_Rate: [warning] No supported version of Google Analytics script seems to be loaded.');
-
+                    }
                 }
 
             },
@@ -230,7 +235,11 @@ if (typeof gkn === 'undefined' || !gkn) {
                 var mins = Math.floor(totalSecs / 60);
                 var secs = totalSecs % 60;
 
-                //Add leading zero.
+                //Add leading zeros.
+                if (mins < 10) {
+                    mins = '0' + mins;
+                }
+
                 if (secs < 10) {
                     secs = '0' + secs;
                 }
