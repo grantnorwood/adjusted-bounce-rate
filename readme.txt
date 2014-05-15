@@ -4,7 +4,7 @@ Donate link: http://grantnorwood.com/
 Tags: google analytics, analytics, bounce rate, avg time on page, avg time on site
 Requires at least: 3.5
 Tested up to: 3.9.1
-Stable tag: 1.1.0
+Stable tag: 1.1.1
 
 A well-designed plugin that helps track the Adjusted Bounce Rate in Google Analytics, and improve accuracy of certain engagement metrics.
 
