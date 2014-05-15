@@ -26,6 +26,7 @@ required to count the user has having engaged.  (Defaults to 10 secs.)
 1. Choose header or footer placement for the code.
 1. Compatible with Yoast's Google Analytics for WordPress. For example, detects if analytics
 were loaded, or if they are disabled because of the currently logged in user's role.
+1. Compatible with Ajaxify jQuery plugin.
 
 
 ## Installation
@@ -61,6 +62,9 @@ Create an issue on the GitHub repo at [https://github.com/grantnorwood/adjusted-
 
 
 ## Changelog
+
+### 1.1.0 (2014-05-15)
+* Added compatibility with Ajaxify (https://github.com/browserstate/ajaxify).
 
 ### 1.0.1 (2014-05-13)
 * Fixed issue when detecting if Yoast's Google Analytics for WordPress plugin is active.

@@ -55,11 +55,14 @@ if (typeof gkn === 'undefined' || !gkn) {
 
                     //Init vars.
                     options = _options;
-                    startTime = new Date();
 
                     //Log.
                     debug.log('Adjusted_Bounce_Rate.init(): options=' + JSON.stringify(options));
 
+                    //If ajaxify is being used, restart on state change complete event.
+                    _self.initAjaxify();
+
+                    //Wait to start?
                     if (options.min_engagement_seconds > 0) {
                         setTimeout(this.start, options.min_engagement_seconds * 1000);
                     } else {
@@ -73,19 +76,50 @@ if (typeof gkn === 'undefined' || !gkn) {
             },
 
             /**
+             * If ajaxify is being used, restart on statechangecomplete event.
+             */
+            initAjaxify: function() {
+
+                $(window).on('statechangecomplete', function() {
+                    _self.restart();
+                });
+
+            },
+
+            /**
              *
              */
             start: function() {
 
                 debug.log('Adjusted_Bounce_Rate.start()');
 
-                //Init time vars.
+                //Init vars.
                 startTime = new Date();
                 elapsedTime = startTime;
+                hitCount = 0;
+                elapsedSecs = 0;
 
                 //Initial tick, then tick on interval.
                 _self.tick(true);
                 timer = setInterval(_self.tick, 500);
+
+            },
+
+            /**
+             *
+             */
+            restart: function() {
+
+                debug.log('Adjusted_Bounce_Rate.restart()');
+
+                _self.stop();
+
+                //Wait to start?
+                if (options.min_engagement_seconds > 0) {
+                    setTimeout(this.start, options.min_engagement_seconds * 1000);
+                } else {
+                    this.start();
+                }
 
             },
 
