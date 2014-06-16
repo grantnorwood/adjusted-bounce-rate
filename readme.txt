@@ -1,6 +1,6 @@
 === Adjusted Bounce Rate ===
 Contributors: grantnorwood
-Donate link: http://grantnorwood.com/
+Donate link: http://grantnorwood.com/donate/
 Tags: google analytics, analytics, bounce rate, avg time on page, avg time on site
 Requires at least: 3.5
 Tested up to: 3.9.1
@@ -39,6 +39,9 @@ required to count the user has having engaged.  (Defaults to 10 secs.)
 were loaded, or if they are disabled because of the currently logged in user's role.
 1. Compatible with Ajaxify jQuery plugin.
 
+= Donate! =
+
+Donations make me happy!  If I've saved you a few dollars or more worth of time, or if you're getting paid for projects where you use my work, please consider throwing a few dollars at me at <http://grantnorwood.com/donate/> :)
 
 == Installation ==
 
