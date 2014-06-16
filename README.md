@@ -29,6 +29,10 @@ required to count the user has having engaged.  (Defaults to 10 secs.)
 were loaded, or if they are disabled because of the currently logged in user's role.
 1. Compatible with Ajaxify jQuery plugin.
 
+## Donate!
+
+Donations make me happy!  If I've saved you a few dollars or more worth of time, or if you're getting paid for projects where you use my work, please consider throwing a few dollars at me at [http://grantnorwood.com/donate/](http://grantnorwood.com/donate/) :)
+
 
 ## Installation
 
