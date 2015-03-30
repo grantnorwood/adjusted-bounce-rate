@@ -1,10 +1,10 @@
 === Adjusted Bounce Rate ===
 Contributors: grantnorwood
-Donate link: http://grantnorwood.com/donate/
+Donate link: http://grantnorwood.com/
 Tags: google analytics, analytics, bounce rate, avg time on page, avg time on site
 Requires at least: 3.5
-Tested up to: 3.9.1
-Stable tag: 1.1.1
+Tested up to: 4.1.1
+Stable tag: 1.2.0
 
 A well-designed plugin that helps track the Adjusted Bounce Rate in Google Analytics, and improve accuracy of certain engagement metrics.
 
@@ -39,9 +39,6 @@ required to count the user has having engaged.  (Defaults to 10 secs.)
 were loaded, or if they are disabled because of the currently logged in user's role.
 1. Compatible with Ajaxify jQuery plugin.
 
-= Donate! =
-
-Donations make me happy!  If I've saved you a few dollars or more worth of time, or if you're getting paid for projects where you use my work, please consider throwing a few dollars at me at <http://grantnorwood.com/donate/> :)
 
 == Installation ==
 
@@ -77,6 +74,9 @@ Create an issue on the GitHub repo at <https://github.com/grantnorwood/adjusted-
 
 
 == Changelog ==
+
+= 1.2.0 (2015-03-27) =
+* Fixed issue where Yoast Google Analytics global vars were renamed in v5.0.7, and the script broke.  Currently, there is no good way to detect whether Yoast's GA plugin is loaded and tracking is not disabled in v5.0.7 and newer.
 
 = 1.1.1 (2014-05-15) =
 * Added leading zero to minutes so that they sort better in Google Analytics.

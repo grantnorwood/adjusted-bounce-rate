@@ -6,7 +6,7 @@
  * Description: A well-designed plugin that helps track the Adjusted Bounce Rate in Google Analytics.
  *
  * Plugin URI: http://wordpress.org/extend/plugins/adjusted-bounce-rate/
- * Version: 1.1.1
+ * Version: 1.2.0
  * Author: Grant K Norwood
  * Author URI: http://grantnorwood.com/
  * License: GPLv2
@@ -42,7 +42,7 @@ class Adjusted_Bounce_Rate {
 	/**
 	 * This plugin's version
 	 */
-	const VERSION = '1.1.1';
+	const VERSION = '1.2.0';
 
 
 
@@ -249,9 +249,18 @@ class Adjusted_Bounce_Rate {
     public function init_frontend() {
 
 	    //Only load if Google Analytics for WordPress is loaded.
-	    global $yoast_ga;
-	    if (!isset($yoast_ga) || $yoast_ga->do_tracking() === false) {
-	    	return;
+	    global $yoast_ga, $yoast_ga_frontend;
+	    $do_tracking = true;
+
+	    //Check for older versions of Yoast (<= 5.0.6).
+	    if (isset($yoast_ga) && $yoast_ga->do_tracking() === false) {
+		    $do_tracking = false;
+	    }
+
+	    //TODO: Find a way to check if tracking should be loaded or not for Yoast GA plugin >= 5.0.7.
+
+	    if (!$do_tracking) {
+		    return;
 	    }
 
         //Header or footer?
