@@ -169,7 +169,7 @@ class Adjusted_Bounce_Rate {
     public function activate() {
 
         if (is_multisite() && !is_network_admin()) {
-            die($this->hsc_utf8(sprintf(__("%s must be activated via the Network Admin interface when WordPress is in multistie network mode.", self::ID), self::NAME)));
+            die($this->hsc_utf8(sprintf(__("%s must be activated via the Network Admin interface when WordPress is in multisite network mode.", self::ID), self::NAME)));
         }
 
         //Save this plugin's options to the database.
