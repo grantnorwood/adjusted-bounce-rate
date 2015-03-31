@@ -72,7 +72,7 @@ class Adjusted_Bounce_Rate {
 	protected $options = array();
 
 	/**
-	 * This plugin's default options
+	 * This plugin's default options (keep fields and defaults in sync with settings.php).
 	 * @var array
 	 */
 	protected $options_default = array(
@@ -83,6 +83,7 @@ class Adjusted_Bounce_Rate {
         'engagement_event_action' => 'time-on-page',
         'code_placement' => 'footer', //"header" or "footer"
         'minify_js' => true,
+		'debug_mode' => false
 	);
 
 	/**
@@ -293,7 +294,8 @@ class Adjusted_Bounce_Rate {
                     min_engagement_seconds: <?php echo $this->options['min_engagement_seconds']; ?>,
                     max_engagement_seconds: <?php echo $this->options['max_engagement_seconds']; ?>,
                     engagement_event_category: '<?php echo $this->options['engagement_event_category']; ?>',
-                    engagement_event_action: '<?php echo $this->options['engagement_event_action']; ?>'
+                    engagement_event_action: '<?php echo $this->options['engagement_event_action']; ?>',
+	                debug_mode: <?php echo $this->options['debug_mode']; ?>
                 });
             });
         </script>

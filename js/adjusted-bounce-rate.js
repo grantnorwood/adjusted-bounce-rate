@@ -18,7 +18,6 @@ if (typeof gkn === 'undefined' || !gkn) {
 
         //Private properties.
         var version = '1.2.0',
-            debugMode = true, //if true, output helpful debug messages and such
             sandboxMode = false, //if true, do NOT actually fire the tracking event (disable in production!)
             options = {},
             startTime,
@@ -27,10 +26,6 @@ if (typeof gkn === 'undefined' || !gkn) {
             hitCount = 0,
             elapsedSecs = 0,
             gaTracking;
-
-        if (debugMode === false) {
-            debug.setLevel(0);
-        }
 
         var _self = {
 
@@ -46,14 +41,18 @@ if (typeof gkn === 'undefined' || !gkn) {
 	                typeof window.pageTracker !== "undefined" //Old urchin tracking
 	                || typeof window._gaq !== "undefined" //Less old ga.js tracking
 	                || typeof window.ga !== "undefined" || typeof window.__gaTracker !== "undefined" //Newer Universal tracking
-	                || debugMode === true //Debug mode, skip detection
+	                || options.debug_mode === true //Debug mode, skip detection
                 ) {
 
                     //Init vars.
                     options = _options;
 
+	                if (options.debug_mode !== true) {
+		                debug.setLevel(0);
+	                }
+
                     //Log.
-	                if (debugMode) {
+	                if (options.debug_mode) {
 		                debug.log('Adjusted_Bounce_Rate.init(): options=' + JSON.stringify(options));
 	                }
 
@@ -91,7 +90,7 @@ if (typeof gkn === 'undefined' || !gkn) {
              */
             start: function() {
 
-	            if (debugMode) {
+	            if (options.debug_mode) {
                     debug.log('Adjusted_Bounce_Rate.start()');
 	            }
 
@@ -112,7 +111,7 @@ if (typeof gkn === 'undefined' || !gkn) {
              */
             restart: function() {
 
-	            if (debugMode) {
+	            if (options.debug_mode) {
 		            debug.log('Adjusted_Bounce_Rate.restart()');
 	            }
 
@@ -134,7 +133,7 @@ if (typeof gkn === 'undefined' || !gkn) {
 
                 var elapsedTime = _self.formatElapsedTime(elapsedSecs);
 
-	            if (debugMode) {
+	            if (options.debug_mode) {
 		            debug.log('Adjusted_Bounce_Rate.stop(): stopped after "' + elapsedTime + '" (' + elapsedSecs + ' seconds).');
 	            }
 
@@ -190,7 +189,7 @@ if (typeof gkn === 'undefined' || !gkn) {
 
                 var elapsedTime = _self.formatElapsedTime(elapsedSecs);
 
-	            if (debugMode) {
+	            if (options.debug_mode) {
 		            debug.log('Adjusted_Bounce_Rate.trackEvent(): ' + hitCount + ' hits' + ', elapsedSecs=' + elapsedSecs + ', elapsedTime=' + elapsedTime);
 	            }
 

@@ -220,6 +220,16 @@ class Adjusted_Bounce_Rate_Settings_Page extends Adjusted_Bounce_Rate {
 				'type' => 'bool',
 				'bool0' => __("Header", self::ID),
 				'bool1' => __("Footer (recommended)", self::ID),
+				'default' => 'bool1',
+			),
+			'debug_mode' => array(
+				'section' => 'code_options',
+				'label' => __("Debug Mode", self::ID),
+				'text' => __("Enable browser console debug messages for troubleshooting. (Should be left disabled in production by default.)", self::ID),
+				'type' => 'bool',
+				'bool0' => __("Disabled", self::ID),
+				'bool1' => __("Enabled", self::ID),
+				'default' => 'bool1',
 			),
 //			'deactivate_deletes_data' => array(
 //				'section' => 'misc',
@@ -387,18 +397,31 @@ class Adjusted_Bounce_Rate_Settings_Page extends Adjusted_Bounce_Rate {
 	 * @return void
 	 */
 	protected function input_radio($name) {
-		echo $this->hsc_utf8($this->fields[$name]['text']) . '<br/>';
-		echo '<input type="radio" value="0" name="'
-			. $this->hsc_utf8($this->option_name)
-			. '[' . $this->hsc_utf8($name) . ']"'
-			. ($this->options[$name] ? '' : ' checked="checked"') . ' /> ';
-		echo $this->hsc_utf8($this->fields[$name]['bool0']);
+
+		$option_name = $this->hsc_utf8($this->option_name) . '[' . $this->hsc_utf8($name) . ']';
+		$text = $this->hsc_utf8($this->fields[$name]['text']);
+		$value = $this->options[$name];
+		$default_value = $this->fields[$name]['default'];
+
+		$bool0_text = $this->hsc_utf8($this->fields[$name]['bool0']);
+		$bool0_checked = (isset($value) && $value === '0') || (!isset($value) && $default_value === 'bool0') ? ' checked="checked"' : '';
+		$bool1_text = $this->hsc_utf8($this->fields[$name]['bool1']);
+		$bool1_checked = (isset($value) && $value === '1') || (!isset($value) && $default_value === 'bool1') ? ' checked="checked"' : '';
+
+		//Text.
+		echo $text . '<br/>';
+
+		//DEBUG.
+		echo "<br>Value: $value<br><br>";
+
+		//Option 1 ("0" value).
+		echo "<input type=\"radio\" value=\"0\" name=\"$option_name\" $bool0_checked/> $bool0_text";
+
 		echo '<br/>';
-		echo '<input type="radio" value="1" name="'
-			. $this->hsc_utf8($this->option_name)
-			. '[' . $this->hsc_utf8($name) . ']"'
-			. ($this->options[$name] ? ' checked="checked"' : '') . ' /> ';
-		echo $this->hsc_utf8($this->fields[$name]['bool1']);
+
+		//Option 2 ("1" value).
+		echo "<input type=\"radio\" value=\"1\" name=\"$option_name\" $bool1_checked/> $bool1_text";
+
 	}
 
 	/**
