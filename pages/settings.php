@@ -204,53 +204,33 @@ class Adjusted_Bounce_Rate_Settings_Page extends Adjusted_Bounce_Rate {
 			'engagement_event_category' => array(
 				'section' => 'event_options',
 				'label' => __("Event Category", self::ID),
-//				'text' => __("See how to set a string value.", self::ID),
+				'text' => __("Read more about event tracking in GA at <a href=\"https://support.google.com/analytics/answer/1033068?hl=en\" target=\"_blank\">https://support.google.com/analytics/answer/1033068?hl=en</a>.", self::ID),
 				'type' => 'string',
 			),
             'engagement_event_action' => array(
                 'section' => 'event_options',
                 'label' => __("Event Action", self::ID),
-//                'text' => __("See how to set a string value.", self::ID),
+                'text' => __("Read more about event tracking in GA at <a href=\"https://support.google.com/analytics/answer/1033068?hl=en\" target=\"_blank\">https://support.google.com/analytics/answer/1033068?hl=en</a>.", self::ID),
                 'type' => 'string',
             ),
 			'code_placement' => array(
 				'section' => 'code_options',
 				'label' => __("Code Placement", self::ID),
 				'text' => __("Where should the tracking code be rendered in the HTML?", self::ID),
-				'type' => 'bool',
-				'bool0' => __("Header", self::ID),
-				'bool1' => __("Footer (recommended)", self::ID),
-				'default' => 'bool1',
+				'type' => 'radio',
+				'options' => array(
+					'header' => __("Header", self::ID),
+					'footer' => __("Footer (recommended)", self::ID)
+				)
 			),
 			'debug_mode' => array(
 				'section' => 'code_options',
 				'label' => __("Debug Mode", self::ID),
-				'text' => __("Enable browser console debug messages for troubleshooting. (Should be left disabled in production by default.)", self::ID),
+				'text' => __("Enable browser console debug messages for troubleshooting.", self::ID),
 				'type' => 'bool',
 				'bool0' => __("Disabled", self::ID),
-				'bool1' => __("Enabled", self::ID),
-				'default' => 'bool1',
-			),
-//			'deactivate_deletes_data' => array(
-//				'section' => 'misc',
-//				'label' => __("Deactivation", self::ID),
-//				'text' => __("Should deactivating the plugin remove all of the plugin's data and settings?", self::ID),
-//				'type' => 'bool',
-//				'bool0' => __("No, preserve the data for future use.", self::ID),
-//				'bool1' => __("Yes, delete the damn data.", self::ID),
-//			),
-//			'example_int' => array(
-//				'section' => 'misc',
-//				'label' => __("Integer", self::ID),
-//				'text' => __("An example for storing an integer value.", self::ID),
-//				'type' => 'int',
-//			),
-//			'example_string' => array(
-//				'section' => 'misc',
-//				'label' => __("String", self::ID),
-//				'text' => __("See how to set a string value.", self::ID),
-//				'type' => 'string',
-//			),
+				'bool1' => __("Enabled (Be sure to disable this in production when you're done troubleshooting!)", self::ID)
+			)
 		);
 	}
 
@@ -368,12 +348,10 @@ class Adjusted_Bounce_Rate_Settings_Page extends Adjusted_Bounce_Rate {
 	 * The callback for rendering the fields
 	 * @return void
 	 *
-	 * @uses adjusted_bounce_rate_admin::input_int()  for rendering
-	 *       text input boxes for numbers
-	 * @uses adjusted_bounce_rate_admin::input_radio()  for rendering
-	 *       radio buttons
-	 * @uses adjusted_bounce_rate_admin::input_string()  for rendering
-	 *       text input boxes for strings
+	 * @uses adjusted_bounce_rate_admin::input_int()  for rendering text input boxes for numbers
+	 * @uses adjusted_bounce_rate_admin::input_bool()  for rendering booleans as radio buttons
+	 * @uses adjusted_bounce_rate_admin::input_radio()  for rendering multiple options as radio buttons
+	 * @uses adjusted_bounce_rate_admin::input_string()  for rendering text input boxes for strings
 	 */
 	public function __call($name, $params) {
 		if (empty($this->fields[$name]['type'])) {
@@ -381,6 +359,9 @@ class Adjusted_Bounce_Rate_Settings_Page extends Adjusted_Bounce_Rate {
 		}
 		switch ($this->fields[$name]['type']) {
 			case 'bool':
+				$this->input_bool($name);
+				break;
+			case 'radio':
 				$this->input_radio($name);
 				break;
 			case 'int':
@@ -393,34 +374,67 @@ class Adjusted_Bounce_Rate_Settings_Page extends Adjusted_Bounce_Rate {
 	}
 
 	/**
-	 * Renders the radio button inputs
+	 * Renders the radio button inputs for "bool" type values.
+	 * @return void
+	 */
+	protected function input_bool($name) {
+
+		$option_name = $this->hsc_utf8($this->option_name) . '[' . $this->hsc_utf8($name) . ']';
+		$text = $this->hsc_utf8($this->fields[$name]['text']);
+		$default_value = $this->options_default[$name];
+		$value = isset($this->options[$name]) && is_bool($this->options[$name]) ? (bool) $this->options[$name] : $default_value;
+
+		//Bool0 is "false".
+		$bool0_text = $this->hsc_utf8($this->fields[$name]['bool0']);
+		$bool0_checked = (isset($value) && $value === false) || (!isset($value) && $default_value === false) ? ' checked="checked"' : '';
+
+		//Bool1 is "true".
+		$bool1_text = $this->hsc_utf8($this->fields[$name]['bool1']);
+		$bool1_checked = (isset($value) && $value === true) || (!isset($value) && $default_value === true) ? ' checked="checked"' : '';
+
+		//Text.
+		echo $text . '<br/>';
+
+		//DEBUG.
+//		echo "<br>Value: " . ($value === true ? 'true' : 'false') . " (" . gettype($value) . ")<br>";
+//		echo "Default: " . ($default_value === true ? 'true' : 'false') . " (" . gettype($default_value) . ")<br><br>";
+
+		//Render radio buttons.
+
+		//False option.
+		echo "<input type=\"radio\" value=\"0\" name=\"$option_name\" $bool0_checked/> $bool0_text";
+
+		echo '<br/>';
+
+		//True option.
+		echo "<input type=\"radio\" value=\"1\" name=\"$option_name\" $bool1_checked/> $bool1_text";
+
+	}
+
+	/**
+	 * Renders the radio button inputs for "radio" type values.
 	 * @return void
 	 */
 	protected function input_radio($name) {
 
 		$option_name = $this->hsc_utf8($this->option_name) . '[' . $this->hsc_utf8($name) . ']';
 		$text = $this->hsc_utf8($this->fields[$name]['text']);
-		$value = $this->options[$name];
-		$default_value = $this->fields[$name]['default'];
-
-		$bool0_text = $this->hsc_utf8($this->fields[$name]['bool0']);
-		$bool0_checked = (isset($value) && $value === '0') || (!isset($value) && $default_value === 'bool0') ? ' checked="checked"' : '';
-		$bool1_text = $this->hsc_utf8($this->fields[$name]['bool1']);
-		$bool1_checked = (isset($value) && $value === '1') || (!isset($value) && $default_value === 'bool1') ? ' checked="checked"' : '';
+		$default_value = $this->options_default[$name];
+		$value = isset($this->options[$name]) ? $this->options[$name] : $default_value;
+		$options = $this->fields[$name]['options'];
 
 		//Text.
 		echo $text . '<br/>';
 
 		//DEBUG.
-		echo "<br>Value: $value<br><br>";
+//		echo "<br>Value: $value (" . gettype($value) . ")<br>";
+//		echo "Default: $default_value (" . gettype($default_value) . ")<br><br>";
 
-		//Option 1 ("0" value).
-		echo "<input type=\"radio\" value=\"0\" name=\"$option_name\" $bool0_checked/> $bool0_text";
-
-		echo '<br/>';
-
-		//Option 2 ("1" value).
-		echo "<input type=\"radio\" value=\"1\" name=\"$option_name\" $bool1_checked/> $bool1_text";
+		//Render radio buttons.
+		foreach ($options as $option_key => $option_value) {
+			$checked = $value === $option_key ? ' checked="checked"' : '';
+			echo "<input type=\"radio\" name=\"$option_name\" value=\"$option_key\" $checked/> $option_value<br>";
+		}
 
 	}
 
@@ -433,9 +447,9 @@ class Adjusted_Bounce_Rate_Settings_Page extends Adjusted_Bounce_Rate {
 			. $this->hsc_utf8($this->option_name)
 			. '[' . $this->hsc_utf8($name) . ']"'
 			. ' value="' . $this->hsc_utf8($this->options[$name]) . '" /> ';
-		echo $this->hsc_utf8($this->fields[$name]['text']
-				. ' ' . __('Default:', self::ID) . ' '
-				. $this->options_default[$name] . '.');
+		echo $this->fields[$name]['text']
+				. '&nbsp;&nbsp;<em>' . __('Default:', self::ID) . ' '
+				. $this->options_default[$name] . '</em>';
 	}
 
 	/**
@@ -448,9 +462,9 @@ class Adjusted_Bounce_Rate_Settings_Page extends Adjusted_Bounce_Rate {
 			. '[' . $this->hsc_utf8($name) . ']"'
 			. ' value="' . $this->hsc_utf8($this->options[$name]) . '" /> ';
 		echo '<br />';
-		echo $this->hsc_utf8($this->fields[$name]['text']
-				. ' ' . __('Default:', self::ID) . ' '
-				. $this->options_default[$name] . '.');
+		echo $this->fields[$name]['text']
+				. '&nbsp;&nbsp;<em>' . __('Default:', self::ID) . ' '
+				. $this->options_default[$name] . '</em>';
 	}
 
 	/**
@@ -464,12 +478,13 @@ class Adjusted_Bounce_Rate_Settings_Page extends Adjusted_Bounce_Rate {
 	 * @return array  the sanitized data to be saved
 	 */
 	public function validate($in) {
+
+		//$out starts with the default options array.
 		$out = $this->options_default;
+
 		if (!is_array($in)) {
 			// Not translating this since only hackers will see it.
-			add_settings_error($this->option_name,
-					$this->hsc_utf8($this->option_name),
-					'Input must be an array.');
+			add_settings_error($this->option_name, $this->hsc_utf8($this->option_name), 'Input must be an array.');
 			return $out;
 		}
 
@@ -478,10 +493,13 @@ class Adjusted_Bounce_Rate_Settings_Page extends Adjusted_Bounce_Rate {
 
 		// Dynamically validate each field using the info in $fields.
 		foreach ($this->fields as $name => $field) {
+
+			//Only validate if field name exists in $in array.
 			if (!array_key_exists($name, $in)) {
 				continue;
 			}
 
+			//Check that it is a scalar (primitive) type.
 			if (!is_scalar($in[$name])) {
 				// Not translating this since only hackers will see it.
 				add_settings_error($this->option_name,
@@ -491,8 +509,10 @@ class Adjusted_Bounce_Rate_Settings_Page extends Adjusted_Bounce_Rate {
 				continue;
 			}
 
+			//Validate depending on field type.
 			switch ($field['type']) {
 				case 'bool':
+
 					if ($in[$name] != 0 && $in[$name] != 1) {
 						// Not translating this since only hackers will see it.
 						add_settings_error($this->option_name,
@@ -501,8 +521,13 @@ class Adjusted_Bounce_Rate_Settings_Page extends Adjusted_Bounce_Rate {
 										. "' must be '0' or '1', $default"));
 						continue 2;
 					}
+
+					//Convert 0 or 1 to boolean.
+					$out[$name] = (bool) $in[$name] == 1;
+
 					break;
 				case 'int':
+
 					if (!ctype_digit($in[$name])) {
 						add_settings_error($this->option_name,
 								$this->hsc_utf8($name),
@@ -511,9 +536,8 @@ class Adjusted_Bounce_Rate_Settings_Page extends Adjusted_Bounce_Rate {
 										. ' ' . $default));
 						continue 2;
 					}
-					if (array_key_exists('greater_than', $field)
-						&& $in[$name] < $field['greater_than'])
-					{
+
+					if (array_key_exists('greater_than', $field) && $in[$name] < $field['greater_than']) {
 						add_settings_error($this->option_name,
 								$this->hsc_utf8($name),
 								$this->hsc_utf8("'" . $field['label'] . "' "
@@ -521,9 +545,17 @@ class Adjusted_Bounce_Rate_Settings_Page extends Adjusted_Bounce_Rate {
 										. ' ' . $default));
 						continue 2;
 					}
+
+					$out[$name] = $in[$name];
+
+					break;
+				default:
+
+					$out[$name] = $in[$name];
+
 					break;
 			}
-			$out[$name] = $in[$name];
+
 		}
 
 		return $out;

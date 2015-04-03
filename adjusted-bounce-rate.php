@@ -99,9 +99,7 @@ class Adjusted_Bounce_Rate {
 	/**
 	 * Declares the WordPress action and filter callbacks
 	 *
-	 * @return void
-	 * @uses adjusted_bounce_rate::initialize()  to set the object's
-	 *       properties
+	 * @uses adjusted_bounce_rate::initialize()  to set the object's properties
 	 */
 	public function __construct() {
 
