@@ -6,7 +6,7 @@
  * Description: A well-designed plugin that helps track the Adjusted Bounce Rate in Google Analytics.
  *
  * Plugin URI: http://wordpress.org/extend/plugins/adjusted-bounce-rate/
- * Version: 1.2.0
+ * Version: 1.2.1
  * Author: Grant K Norwood
  * Author URI: http://grantnorwood.com/
  * License: GPLv2
@@ -25,7 +25,7 @@ $GLOBALS['adjusted_bounce_rate'] = new Adjusted_Bounce_Rate;
  * @link http://wordpress.org/extend/plugins/adjusted-bounce-rate/
  * @license http://www.gnu.org/licenses/gpl-2.0.html GPLv2
  * @author Grant K Norwood (http://grantnorwood.com)
- * @copyright Grant K Norwood, 2014
+ * @copyright Grant K Norwood, 2015
  */
 class Adjusted_Bounce_Rate {
 
@@ -295,7 +295,7 @@ class Adjusted_Bounce_Rate {
                     max_engagement_seconds: <?php echo $this->options['max_engagement_seconds']; ?>,
                     engagement_event_category: '<?php echo $this->options['engagement_event_category']; ?>',
                     engagement_event_action: '<?php echo $this->options['engagement_event_action']; ?>',
-	                debug_mode: <?php echo $this->options['debug_mode']; ?>
+	                debug_mode: <?php echo $this->options['debug_mode'] === '1' ? 'true' : 'false'; ?>
                 });
             });
         </script>
