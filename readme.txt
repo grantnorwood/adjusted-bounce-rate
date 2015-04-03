@@ -1,17 +1,17 @@
 === Adjusted Bounce Rate ===
 Contributors: grantnorwood
 Donate link: http://grantnorwood.com/
-Tags: google analytics, analytics, bounce rate, avg time on page, avg time on site
+Tags: google analytics, analytics, bounce rate, time on page, time on site, session duration
 Requires at least: 3.5
 Tested up to: 4.1.1
-Stable tag: 1.2.0
+Stable tag: 1.2.1
 
-A well-designed plugin that helps track the Adjusted Bounce Rate in Google Analytics, and improve accuracy of certain engagement metrics.
+A well-designed plugin that improves the accuracy of your bounce rate, time on page, and session duration metrics in Google Analytics.
 
 
 == Description ==
 
-Google Analytics does not properly track some important engagement metrics like Avg Time on Site, Avg Session Duration, and Bounce Rate.  This plugin uses a commonly-accepted JavaScript method of improving the accuracy of these stats.
+Google Analytics does not properly track some important engagement metrics like Avg Session Duration, Avg Session Duration, and Bounce Rate.  This plugin uses a commonly-accepted JavaScript method of improving the accuracy of these stats.
 
 This plugin addresses the issues as identified by the Google Analytics team at:
 
@@ -35,8 +35,6 @@ required to count the user has having engaged.  (Defaults to 10 secs.)
 1. Create goals in Google Analytics based on the time on page. (GA goals only support session duration by default!)
 1. Uses either the old pageTracker code, the newer asynchronous code, or the newest Universal Analytics code.
 1. Choose header or footer placement for the code.
-1. Compatible with Yoast's Google Analytics for WordPress. For example, detects if analytics
-were loaded, or if they are disabled because of the currently logged in user's role.
 1. Compatible with Ajaxify jQuery plugin.
 
 
@@ -60,8 +58,7 @@ were loaded, or if they are disabled because of the currently logged in user's r
 
 = Is this plugin multi-site compatible? =
 
-Yes, for multi-site networks you must activate this plugin via the Network Admin
-panel.
+Maybe, but I have not tested this plugin on multi-site.  If you run into any issues, please fork my GitHub repo (see below) and send a pull request with your fixes.  I'd be very appreciative!
 
 = Where can I submit bugs or request new features? =
 
@@ -74,6 +71,9 @@ Create an issue on the GitHub repo at <https://github.com/grantnorwood/adjusted-
 
 
 == Changelog ==
+
+= 1.2.1 (2015-04-03) =
+* Added option to enable "debug mode", which shows helpful messages in the browser console when engagement hit events are fired.
 
 = 1.2.0 (2015-03-27) =
 * Fixed issue where Yoast Google Analytics global vars were renamed in v5.0.7, and the script broke.  Currently, there is no good way to detect whether Yoast's GA plugin is loaded and tracking is not disabled in v5.0.7 and newer.

@@ -3,7 +3,7 @@
 /**
  * Plugin Name: Adjusted Bounce Rate
  *
- * Description: A well-designed plugin that helps track the Adjusted Bounce Rate in Google Analytics.
+ * Description: A well-designed plugin that improves the accuracy of your bounce rate, time on page, and session duration metrics in Google Analytics.
  *
  * Plugin URI: http://wordpress.org/extend/plugins/adjusted-bounce-rate/
  * Version: 1.2.1
@@ -250,7 +250,7 @@ class Adjusted_Bounce_Rate {
     public function init_frontend() {
 
 	    //Only load if Google Analytics for WordPress is loaded.
-	    global $yoast_ga, $yoast_ga_frontend;
+	    global $yoast_ga;
 	    $do_tracking = true;
 
 	    //Check for older versions of Yoast (<= 5.0.6).
