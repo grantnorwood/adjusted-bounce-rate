@@ -36,6 +36,12 @@ module.exports = function (grunt) {
 			}
 		},
 
+		clean: {
+			js: {
+				src: ['js/*.concat.js']
+			}
+		},
+
 		watch: {
 			grunt: {
 				files: ['Gruntfile.js'],
@@ -43,19 +49,24 @@ module.exports = function (grunt) {
 			},
 
 			js: {
-				files: 'js/adjusted-bounce-rate.js',
+				files: [
+					'js/**/*.js',
+					'!js/**/*.concat.js',
+					'!js/**/*.min.js'
+				],
 				tasks: ['build']
 			}
 		}
 	});
 
 	//Load tasks.
+	grunt.loadNpmTasks('grunt-contrib-clean');
 	grunt.loadNpmTasks('grunt-contrib-concat');
 	grunt.loadNpmTasks('grunt-contrib-uglify');
 	grunt.loadNpmTasks('grunt-contrib-watch');
 
 	//Register tasks.
-	grunt.registerTask('build', ['concat', 'uglify']);
+	grunt.registerTask('build', ['concat', 'uglify', 'clean']);
 	grunt.registerTask('default', ['build', 'watch']);
 
 };
