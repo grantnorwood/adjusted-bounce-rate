@@ -1,0 +1,30 @@
+{
+  "name": "adjusted-bounce-rate",
+  "version": "2.0.0",
+  "homepage": "https://github.com/grantnorwood/adjusted-bounce-rate",
+  "authors": [
+    "grantnorwood <gkn@grantnorwood.com>"
+  ],
+  "description": "A well-designed plugin that improves the accuracy of your bounce rate, time on page, and session duration metrics in Google Analytics.",
+  "keywords": [
+    "google analytics",
+    "analytics",
+    "bounce rate",
+    "time on page",
+    "time on site",
+    "session duration"
+  ],
+  "license": "MIT",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "bootstrap": "~3.3.2",
+    "rsvp": "~3.0.17"
+  }
+}

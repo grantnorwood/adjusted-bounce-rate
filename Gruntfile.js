@@ -3,42 +3,39 @@ module.exports = function (grunt) {
 	grunt.initConfig({
 		pkg: grunt.file.readJSON('package.json'),
 
-		concat: {
-			options: {
-				separator: ';' +
-					grunt.util.linefeed +
-					grunt.util.linefeed,
-				stripBanners: false
-			},
-			js: {
+		less: {
+			all: {
+				options: {
+					compress: true
+				},
 				files: {
-					'js/adjusted-bounce-rate.concat.js': [
-						'lib/ba-debug.min.js',
-						'js/adjusted-bounce-rate.js'
+					'css/adjusted-bounce-rate.css': [
+						'less/adjusted-bounce-rate.less'
 					]
 				}
 			}
 		},
 
-		uglify: {
+		concat: {
 			options: {
-				mangle: false,
-				preserveComments: 'some',
+				separator: ';' +
+					grunt.util.linefeed +
+					grunt.util.linefeed,
 				banner: '/*! <%= pkg.name %> - v<%= pkg.version %> - ' +
 					'<%= grunt.template.today("yyyy-mm-dd") %> */' +
 					grunt.util.linefeed +
 					grunt.util.linefeed
 			},
-			dist: {
-				files: {
-					'js/adjusted-bounce-rate.min.js': ['js/adjusted-bounce-rate.concat.js']
-				}
-			}
-		},
-
-		clean: {
 			js: {
-				src: ['js/*.concat.js']
+				files: {
+					'js/adjusted-bounce-rate.dist.js': [
+						'bower_components/rsvp/rsvp.min.js',
+						'bower_components/bootstrap/dist/js/bootstrap.min.js',
+						'js/views/PhoneBookTabView.js',
+						'js/views/OptionsTabView.js',
+						'js/adjusted-bounce-rate.js'
+					]
+				}
 			}
 		},
 
@@ -48,25 +45,29 @@ module.exports = function (grunt) {
 				tasks: ['default']
 			},
 
+			less: {
+				files: 'less/**/*.less',
+				tasks: ['less']
+			},
+
 			js: {
 				files: [
 					'js/**/*.js',
-					'!js/**/*.concat.js',
-					'!js/**/*.min.js'
+					'!js/**/*.dist.js'
 				],
-				tasks: ['build']
+				tasks: ['concat']
 			}
 		}
 	});
 
 	//Load tasks.
-	grunt.loadNpmTasks('grunt-contrib-clean');
+	grunt.loadNpmTasks('grunt-contrib-less');
 	grunt.loadNpmTasks('grunt-contrib-concat');
-	grunt.loadNpmTasks('grunt-contrib-uglify');
 	grunt.loadNpmTasks('grunt-contrib-watch');
 
 	//Register tasks.
-	grunt.registerTask('build', ['concat', 'uglify', 'clean']);
+	grunt.registerTask('build', ['less', 'concat']);
+	grunt.registerTask('dist', ['build']);
 	grunt.registerTask('default', ['build', 'watch']);
 
 };

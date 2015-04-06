@@ -1,0 +1,133 @@
+
+@import '_lesshat-prefixed';
+
+/**
+ * Modify Bootstrap.
+ */
+
+//TODO: This isn't working ... had to hack glyphicon location by copying fonts folder to theme root folder.
+@icon-font-path: 'bower_components/bootstrap/dist/fonts/';
+
+
+
+
+/**
+ * Global styles.
+ */
+
+#wpcontent {
+  padding-left: 0;
+}
+
+body {
+    background-color: transparent !important;
+}
+
+/* No textarea */
+/*select, input[type="text"], input[type="password"], input[type="datetime"], input[type="datetime-local"], input[type="date"], input[type="month"], input[type="time"], input[type="week"], input[type="number"], input[type="email"], input[type="url"], input[type="search"], input[type="tel"], input[type="color"], .uneditable-input {
+    height: 30px;
+}
+
+.input-xl {
+    width: 300px;
+}
+
+legend {
+    font-size: 18px;
+}*/
+
+/* Import Bootstrap within the wrapper. (@see http://hereswhatidid.com/2014/02/use-bootstrap-3-styles-within-the-wordpress-admin/) */
+.bootstrap-wrapper {
+
+  @import (less) url('bower_components/bootstrap/dist/css/bootstrap.css');
+
+  /**
+   * Adjusted Bounce Rate.
+   */
+
+  /* Tabs */
+  .tab-pane {
+	padding: 20px 0;
+
+	> h3:first-of-type {
+	  margin-top: 0;
+	}
+
+	.form-group:first-of-type h3:first-of-type {
+	  margin-top: 0;
+	}
+  }
+
+  /* Forms */
+  .form-group {
+	overflow: hidden;
+
+	&> h3:not(:first-of-type) {
+	  margin-top: 3rem;
+	}
+  }
+
+  .form-control-feedback {
+	right: 1.5rem;
+  }
+
+
+
+
+  /* textarea */
+  textarea {
+	resize:both; // none|horizontal|vertical|both
+  }
+
+  textarea.resize-horizontal {
+	resize:horizontal;
+  }
+
+  textarea.resize-vertical {
+	resize:vertical;
+  }
+
+  textarea.resize-none {
+	resize:none;
+  }
+
+
+
+
+  /* #OptionsTab */
+  #OptionsTab {
+
+	#engagementInterval, #minimumEngagement, #maximumEngagement {
+	  max-width: 4rem;
+	}
+
+  }
+
+
+
+
+  /* user_msg */
+  #alert_container {
+	display: none;
+  }
+
+
+
+
+  /**
+   * Forms
+   */
+
+  /* buttons */
+  button > .glyphicon {
+	margin-right: 0.5rem;
+  }
+  button.abr-saving > .glyphicon {
+	.lh-animation(pulse 750ms linear infinite);
+  }
+
+  //Therefore LESS Hat generates placeholder selector lesshat-selector { -lh-property: 0; } with unknown property, which browsers ignore and after that, there is actually keyframes syntax.
+  //And also because of bad architecture of LESS CSS language, keyframes definition has to be on single line. (@see https://github.com/madebysource/lesshat/blob/master/README.md#keyframes)
+  .lh-keyframes(~'pulse, 0% {transform: scale(1.1);} 70% {transform: scale(0.8);} 100% {transform: scale(1);}');
+
+}

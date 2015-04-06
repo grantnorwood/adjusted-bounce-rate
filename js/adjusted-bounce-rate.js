@@ -1,336 +1,466 @@
-/*!
- * Adjusted Bounce Rate
- */
-
-/**
- * gkn namespace
- */
-if (typeof gkn === 'undefined' || !gkn) {
-    var gkn = {};
-}
-
 (function($) {
 
-    /**
-     * AdjustedBounceRate class.
-     */
-    gkn.AdjustedBounceRate = function() {
-
-        //Private properties.
-        var version = '1.2.1',
-            sandboxMode = false, //if true, do NOT actually fire the tracking event (disable in production!)
-            startTime,
-            elapsedTime,
-            timer,
-            hitCount = 0,
-            elapsedSecs = 0,
-            gaTracking;
-
-        var _self = {
-
-            /**
-             * Initializes the singleton class.
-             *
-             * @param       _options
-             * @return      void
-             */
-            init: function(_options) {
-
-	            //Init vars.
-	            _self.options = _options;
-
-	            if (_self.options.debug_mode !== true) {
-		            //Turn off debugging.
-		            debug.setLevel(0);
-	            }
-
-	            if (_self.options.debug_mode) {
-		            //Log start.
-		            debug.log('Adjusted_Bounce_Rate.init(): _self.options=' + JSON.stringify(_self.options));
-	            }
-
-                if (
-	                typeof window.pageTracker !== "undefined" //Old urchin tracking
-	                || typeof window._gaq !== "undefined" //Less old ga.js tracking
-	                || typeof window.ga !== "undefined" || typeof window.__gaTracker !== "undefined" //Newer Universal tracking
-	                //TODO: || options.debug_mode === true //Debug mode, skip detection
-                ) {
-
-                    //If ajaxify is being used, restart on state change complete event.
-                    _self.initAjaxify();
-
-                    //Wait to start?
-                    if (_self.options.min_engagement_seconds > 0) {
-                        setTimeout(this.start, _self.options.min_engagement_seconds * 1000);
-                    } else {
-                        this.start();
-                    }
-
-                } else {
-
-	                if (_self.options.debug_mode) {
-		                debug.log('Adjusted Bounce Rate: GA is not loaded.');
-	                }
-
-                }
-
-            },
+	"use strict";
 
-            /**
-             * If ajaxify is being used, restart on statechangecomplete event.
-             */
-            initAjaxify: function() {
-
-                $(window).on('statechangecomplete', function() {
-                    _self.restart();
-                });
+	/**
+	 * App class.
+	 */
+	window.adjustedBounceRate = function() {
 
-            },
+		//
+		// Private vars.
+		//
+		var fadeDuration = 'fast';
 
-            /**
-             *
-             */
-            start: function() {
 
-	            if (_self.options.debug_mode) {
-                    debug.log('Adjusted_Bounce_Rate.start()');
-	            }
+		var _self = {
 
-                //Init vars.
-                startTime = new Date();
-                elapsedTime = startTime;
-                hitCount = 0;
-                elapsedSecs = 0;
-
-                //Initial tick, then tick on interval.
-                _self.tick(true);
-                timer = setInterval(_self.tick, 500);
-
-            },
-
-            /**
-             *
-             */
-            restart: function() {
+			//
+			// Public properties.
+			//
 
-	            if (_self.options.debug_mode) {
-		            debug.log('Adjusted_Bounce_Rate.restart()');
-	            }
+			errorMsg: 'Uh oh, an error occurred.',
+			ajaxUrl: null,
+			pluginOptions: null,
+			phoneBookEntries: null,
 
-                _self.stop();
+			phoneBookTabView: null,
+			optionsTabView: null,
 
-                //Wait to start?
-                if (_self.options.min_engagement_seconds > 0) {
-                    setTimeout(this.start, _self.options.min_engagement_seconds * 1000);
-                } else {
-                    this.start();
-                }
 
-            },
 
-            /**
-             *
-             */
-            stop: function() {
 
-                var elapsedTime = _self.formatElapsedTime(elapsedSecs);
+			/**
+			 * Init the plugin UI when the page is loaded.
+			 */
+			init: function() {
 
-	            if (_self.options.debug_mode) {
-		            debug.log('Adjusted_Bounce_Rate.stop(): stopped after "' + elapsedTime + '" (' + elapsedSecs + ' seconds).');
-	            }
+				//Init some properties.
+				this.ajaxUrl = _adjustedBounceRate.ajaxUrl;
+				this.pluginOptions = _adjustedBounceRate.initialOptions;
+				this.phoneBookEntries = _adjustedBounceRate.phoneBookEntries;
 
-                clearInterval(timer);
+				//Init views.
+				//this.phoneBookTabView = new window.adjustedBounceRate.views.PhoneBookTabView();
 
-            },
+				this.optionsTabView = new window.adjustedBounceRate.views.OptionsTabView();
 
-            /**
-             *
-             */
-            tick: function(firstTick) {
+			},
 
-                if (typeof firstTick === 'undefined') {
-                    firstTick = false;
-                }
 
-                var now = new Date();
-                var elapsedDiff = _self.dateDiff(elapsedTime, now, 'seconds');
 
-                //Keep tickin'.
-                if (elapsedDiff >= _self.options.engagement_interval_seconds || firstTick === true) {
 
-                    //Increment the engagement hit counter.
-                    hitCount++;
-                    elapsedSecs = hitCount * _self.options.engagement_interval_seconds;
+			/* ----------------------------------------------------------------------------------------------------------
+			 * Event handlers.
+			 * ---------------------------------------------------------------------------------------------------------- */
 
-                    /*debug.log('Adjusted_Bounce_Rate.tick(): startTime=' + startTime.getTime()
-                        + ', elapsedTime=' + elapsedTime.getTime()
-                        + ', elapsedDiff=' + elapsedDiff);*/
 
-                    //Track the event.
-                    _self.trackEvent();
 
-                    //Reset elapsed time each engagement interval.
-                    elapsedTime = new Date();
 
-                }
+			/* ----------------------------------------------------------------------------------------------------------
+			 * Public Methods.
+			 * ---------------------------------------------------------------------------------------------------------- */
 
-                //Stop the ticking?
-                if (elapsedSecs >= _self.options.max_engagement_seconds) {
+			/**
+			 * Attempt to save options to the server.
+			 *
+			 * @param       options             {window.adjustedBounceRate.models.OptionsModel}
+			 * @returns     {RSVP.Promise}
+			 */
+			saveOptions: function(options) {
 
-                    //Stop.
-                    _self.stop();
-                }
+				return new RSVP.Promise(function(resolve, reject) {
 
-            },
+					if (typeof options === 'object') {
 
-            /**
-             * Call the GA event tracker.
-             *
-             */
-            trackEvent: function() {
+						var request = $.ajax({
+							url: adjustedBounceRate.ajaxUrl,
+							type: "POST",
+							data: { action: 'abr_save_options', options: options },
+							dataType: "json"
+						});
 
-                var elapsedTime = _self.formatElapsedTime(elapsedSecs);
+						request.done(function(response) {
 
-	            if (_self.options.debug_mode) {
-		            debug.log('Adjusted_Bounce_Rate.trackEvent(): ' + hitCount + ' hits' + ', elapsedSecs=' + elapsedSecs + ', elapsedTime=' + elapsedTime);
-	            }
+							//Check for errors.
+							if ($.isArray(response.errors) && response.errors.length > 0) {
+								reject(response.errors);
+								return;
+							}
 
-                if (typeof gaTracking === 'undefined' || gaTracking == '') {
-                    //Detect GA version by script vars.
-                    if (typeof window.pageTracker !== 'undefined') {
-	                    gaTracking = 'pageTracker';
-                    } else if (typeof window._gaq !== 'undefined') {
-                        gaTracking = '_gaq';
-                    } else if (typeof window.ga !== 'undefined') {
-	                    gaTracking = 'ga';
-                    } else if (typeof window.__gaTracker !== 'undefined') {
-	                    gaTracking = '__gaTracker';
-                    }
-                }
+							var success = response.data;
 
-                if (!sandboxMode) {
-                    if (gaTracking == 'pageTracker') {
+							resolve(success);
 
-	                    //Old Urchin.js tracking.
+						});
 
-                        window.pageTracker._trackEvent(
-	                        _self.options.engagement_event_category,
-	                        _self.options.engagement_event_action,
-                            elapsedTime,
-                            elapsedSecs || 0
-                        );
+						request.fail(function(jqXHR, textStatus, errorMsg) {
 
-                    } else if (gaTracking == '_gaq') {
-
-	                    //Old ga.js tracking.
-
-                        window._gaq.push([
-                            '_trackEvent',
-	                        _self.options.engagement_event_category,
-	                        _self.options.engagement_event_action,
-                            elapsedTime,
-                            elapsedSecs || 0
-                        ]);
+							reject([errorMsg]);
 
-                    } else if (gaTracking == 'ga') {
+						});
 
-	                    //Newer Universal analytics.js tracking.
+					} else {
 
-	                    ga('send', {
-		                    'hitType': 'event',                                     // Required.
-		                    'eventCategory': _self.options.engagement_event_category,     // Required.
-		                    'eventAction': _self.options.engagement_event_action,         // Required.
-		                    'eventLabel': elapsedTime,
-		                    'eventValue': elapsedSecs || 0
-	                    });
+						reject(Error('Options was not a valid object.'));
 
-                    }else if (gaTracking == '__gaTracker') {
+					}
 
-	                    //Newer Universal analytics.js tracking (Yoast's Google Analytics for WordPress uses a different global variable name).
+				});
 
-	                    __gaTracker('send', {
-		                    'hitType': 'event',                                     // Required.
-		                    'eventCategory': _self.options.engagement_event_category,     // Required.
-		                    'eventAction': _self.options.engagement_event_action,         // Required.
-		                    'eventLabel': elapsedTime,
-		                    'eventValue': elapsedSecs || 0
-	                    });
+			},
 
-                    } else {
 
-                        //No supported analytics script loaded.
-                        debug.warn('Adjusted_Bounce_Rate: [warning] No supported version of Google Analytics script seems to be loaded.');
 
-                    }
-                }
 
-            },
+			/* ----------------------------------------------------------------------------------------------------------
+			 * Alerts.
+			 * ---------------------------------------------------------------------------------------------------------- */
 
-            /**
-             * Convert to "mins:secs" format.
-             */
-            formatElapsedTime: function(totalSecs) {
+			/**
+			 * Show an alert, or array of alerts.  All alerts must be of a single type (alertType).
+			 *
+			 * @param       messages        string[]
+			 * @param       alertType       string
+			 * @returns     void
+			 */
+			showAlert: function(messages, alertType) {
 
-                var mins = Math.floor(totalSecs / 60);
-                var secs = totalSecs % 60;
+				if (!alertType || alertType === 'error') {
+					alertType = 'danger';
+				}
 
-                //Add leading zeros.
-                if (mins < 10) {
-                    mins = '0' + mins;
-                }
+				var html = [],
+					message;
 
-                if (secs < 10) {
-                    secs = '0' + secs;
-                }
+				if (_.isArray(messages)) {
 
-                return mins + ":" + secs;
+					//Reduce all messages to a single block of html.
+					message = _.reduce(messages, function(memo, value, index) {
 
-            },
+						if (index !== 0) {
+							memo += '<br>';
+						}
 
-            /*
-             * DateFormat month/day/year hh:mm:ss
-             * ex.
-             * datediff('01/01/2011 12:00:00','01/01/2011 13:30:00','seconds');
-             */
-            dateDiff: function(fromDate, toDate, interval) {
+						if (_.isObject(value)) {
+							memo += value.message;
+						} else {
+							//Treat it like a string.
+							memo += value;
+						}
 
-                var second=1000, minute=second*60;
+						return memo;
 
-                if (!interval) {
-                    interval = 'milliseconds'
-                }
+					}, '');
 
-                if (typeof fromDate === 'string') {
-                    fromDate = new Date(fromDate);
-                }
-                if (typeof toDate === 'string') {
-                    toDate = new Date(toDate);
-                }
+				} else {
 
-                var timeDiff = toDate - fromDate;
-                if (isNaN(timeDiff)) return NaN;
-                switch (interval) {
-                    case "years": return toDate.getFullYear() - fromDate.getFullYear();
-                    case "months": return (
-                        ( toDate.getFullYear() * 12 + toDate.getMonth() )
-                            -
-                            ( fromDate.getFullYear() * 12 + fromDate.getMonth() )
-                        );
-                    case "weeks"  : return Math.floor(timeDiff / week);
-                    case "days"   : return Math.floor(timeDiff / day);
-                    case "hours"  : return Math.floor(timeDiff / hour);
-                    case "minutes": return Math.floor(timeDiff / minute);
-                    case "seconds": return Math.floor(timeDiff / second);
-                    case "milliseconds": return timeDiff;
-                    default: return undefined;
-                }
+					//Treat "messages" as a string.
+					message = messages;
 
-            }
+				}
 
-        };
+				//Build the alert html.
+				html.push('<div class="col-md-6">');
+				html.push('<div class="alert alert-' + alertType + ' alert-dismissible fade in" role="alert">');
+				html.push('<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">×</span></button>');
+				html.push(message);
+				html.push('</div>');
+				html.push('</div>');
 
-        return _self;
+				$('#alert_container').empty().show().html(html.join(''));
 
-    }();
+			},
+
+			/**
+			 * Hide alert.
+			 *
+			 * @returns     void
+			 */
+			hideAlert: function() {
+
+				$('#alert_container').alert('close');
+
+			},
+
+
+
+
+			/* ----------------------------------------------------------------------------------------------------------
+			 * Forms.
+			 * ---------------------------------------------------------------------------------------------------------- */
+
+			/**
+			 * Forms methods.
+			 *
+			 * @returns     void
+			 */
+			forms: {
+
+				/**
+				 *
+				 *
+				 * @param       btn         string|jQueryElement
+				 * @returns     void
+				 */
+				buttonOnSaveBegin: function(btn) {
+
+					if (!btn) {
+						return;
+					} else if (_.isString(btn)) {
+						btn = $(btn);
+					}
+
+					btn.prop('disabled', true);
+					btn.addClass('abr-saving');
+
+				},
+
+				/**
+				 *
+				 *
+				 * @param       btn         string|jQueryElement
+				 * @returns     void
+				 */
+				buttonOnSaveSuccess: function(btn) {
+
+					if (!btn) {
+						return;
+					} else if (_.isString(btn)) {
+						btn = $(btn);
+					}
+
+					btn.prop('disabled', false);
+					btn.removeClass('abr-saving');
+
+				},
+
+				/**
+				 *
+				 *
+				 * @param       btn         string|jQueryElement
+				 * @returns     void
+				 */
+				buttonOnSaveFail: function(btn) {
+
+					if (!btn) {
+						return;
+					} else if (_.isString(btn)) {
+						btn = $(btn);
+					}
+
+					btn.prop('disabled', false);
+					btn.removeClass('abr-saving');
+
+				},
+
+				/**
+				 *
+				 *
+				 * @param       textbox         string|jQueryElement
+				 * @returns     void
+				 */
+				textboxSuccess: function(textbox) {
+
+					if (!textbox) {
+						return;
+					} else if (_.isString(textbox)) {
+						textbox = $(textbox);
+					}
+
+					//Form group class.
+					textbox.closest('.form-group').removeClass('has-error');
+					textbox.closest('.form-group').addClass('has-success has-feedback');
+
+					//Glyphicon.
+					var glyph = textbox.next('span.glyphicon');
+
+					if (glyph.length == 0) {
+						glyph = $('<span class="glyphicon glyphicon-ok form-control-feedback" aria-hidden="true"></span>');
+						glyph.insertAfter(textbox);
+					} else {
+						glyph.removeClass('glyphicon-remove');
+						glyph.addClass('glyphicon-ok');
+					}
+
+				},
+
+				/**
+				 *
+				 *
+				 * @param       textbox         string|jQueryElement
+				 * @returns     void
+				 */
+				textboxError: function(textbox) {
+
+					if (!textbox) {
+						return;
+					} else if (_.isString(textbox)) {
+						textbox = $(textbox);
+					}
+
+					//Form group class.
+					textbox.closest('.form-group').removeClass('has-success');
+					textbox.closest('.form-group').addClass('has-error has-feedback');
+
+					//Glyphicon.
+					var glyph = textbox.next('span.glyphicon');
+
+					if (glyph.length == 0) {
+						glyph = $('<span class="glyphicon glyphicon-remove form-control-feedback" aria-hidden="true"></span>');
+						glyph.insertAfter(textbox);
+					} else {
+						glyph.removeClass('glyphicon-ok');
+						glyph.addClass('glyphicon-remove');
+					}
+
+				},
+
+				/**
+				 *
+				 *
+				 * @param       textbox         string|jQueryElement
+				 * @returns     void
+				 */
+				textboxDefault: function(textbox) {
+
+					if (!textbox) {
+						return;
+					} else if (_.isString(textbox)) {
+						textbox = $(textbox);
+					}
+
+					//Form group class.
+					textbox.closest('.form-group').removeClass('has-error has-success has-feedback');
+
+					//Glyphicon.
+					var glyph = textbox.sibling('span.glyphicon');
+					if (glyph) {
+						glyph.remove();
+					}
+
+				}
+
+			},
+
+
+
+
+			/* ----------------------------------------------------------------------------------------------------------
+			 * Twilio.
+			 * ---------------------------------------------------------------------------------------------------------- */
+
+			/**
+			 *
+			 */
+			twilio: {
+
+				/**
+				 *
+				 *
+				 * @param       accountSID      string
+				 * @param       authToken       string
+				 * @returns     {RSVP.Promise}
+				 */
+				checkCredentials: function (accountSID, authToken) {
+
+					return new RSVP.Promise(function(resolve, reject) {
+
+						if (_.isEmpty(accountSID) || _.isEmpty(authToken)) {
+							reject(['accountSID or authToken parameters were missing.'])
+						}
+
+						var request = $.ajax({
+							url: adjustedBounceRate.ajaxUrl,
+							type: "POST",
+							data: { action: 'abr_check_twilio_credentials', account_sid: accountSID, auth_token: authToken },
+							dataType: "json"
+						});
+
+						request.done(function(response) {
+
+							//Check for errors.
+							if ($.isArray(response.errors) && response.errors.length > 0) {
+								reject(response.errors);
+								return;
+							}
+
+							var phoneNumbers = response.data;
+
+							resolve(phoneNumbers);
+
+						});
+
+						request.fail(function(jqXHR, textStatus, errorMsg) {
+
+							reject([errorMsg]);
+
+						});
+
+					});
+
+				},
+
+				/**
+				 *
+				 *
+				 * @param       toPhoneNumber       string
+				 * @param       message             string
+				 * @returns     {RSVP.Promise}
+				 */
+				sendSMS: function (toPhoneNumber, message) {
+
+					return new RSVP.Promise(function(resolve, reject) {
+
+						if (_.isEmpty(toPhoneNumber) || _.isEmpty(message)) {
+							reject(['toPhoneNumber or message parameters were missing.'])
+						}
+
+						var request = $.ajax({
+							url: adjustedBounceRate.ajaxUrl,
+							type: "POST",
+							data: { action: 'abr_send_sms', toPhoneNumber: toPhoneNumber, message: message },
+							dataType: "json"
+						});
+
+						request.done(function(response) {
+
+							//Check for errors.
+							if ($.isArray(response.errors) && response.errors.length > 0) {
+								reject(response.errors);
+								return;
+							}
+
+							var userMessages = response.data;
+
+							resolve(userMessages);
+
+						});
+
+						request.fail(function(jqXHR, textStatus, errorMsg) {
+
+							reject([errorMsg]);
+
+						});
+
+					});
+
+				}
+
+			}
+
+		};
+
+		return _self;
+
+	}();
+
+	//Init the dashboard.
+	$(document).ready(function() {
+		adjustedBounceRate.init();
+	});
 
 })(jQuery);
+
+//Alias it.
+var adjustedBounceRate = window.adjustedBounceRate;
