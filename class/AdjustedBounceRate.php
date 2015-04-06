@@ -266,8 +266,9 @@ class AdjustedBounceRate {
 	/**
 	 * Saves the JSON-encoded string as an option in the database.
 	 *
-	 * @param   string          $optionsJSON
-	 * @return  boolean         Returns true if the operation was successful, or false if there was an error.
+	 * @param   string $optionsJSON
+	 * @return  bool Returns true if the operation was successful, or false if there was an error.
+	 * @throws  \Exception
 	 */
 	function saveOptionsJSON($optionsJSON) {
 

@@ -72,7 +72,7 @@
 						var request = $.ajax({
 							url: adjustedBounceRate.ajaxUrl,
 							type: "POST",
-							data: { action: 'abr_save_options', options: options },
+							data: { action: 'abr_save_options', options: JSON.stringify(options) },
 							dataType: "json"
 						});
 

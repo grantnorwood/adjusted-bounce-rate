@@ -107,7 +107,7 @@ class AjaxActions {
 
 		global $adjustedBounceRate;
 		$success = false;
-		$options_json = json_encode($_POST['options'], JSON_FORCE_OBJECT);
+		$options_json = $_POST['options'];
 
 		//Check params.
 		if (!empty($options_json)) {

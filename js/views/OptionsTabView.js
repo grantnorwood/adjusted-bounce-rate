@@ -72,12 +72,9 @@
 				'maximumEngagement' : parseInt(self.$('#maximumEngagement').val(), 10),
 				'eventCategory' : self.$('#eventCategory').val(),
 				'eventAction' : self.$('#eventAction').val(),
-				'codePlacement' : self.$('[name="codePlacement"]:selected').val(),
+				'codePlacement' : self.$('input[name="codePlacement"]:checked').val(),
 				'debugMode' : self.$('#debugMode').is(':checked')
 			};
-
-			//DEBUG
-			alert(JSON.stringify(options)); return;
 
 			adjustedBounceRate.forms.buttonOnSaveBegin('#saveBtn');
 
