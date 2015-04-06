@@ -10,12 +10,14 @@ namespace gkn_abr;
 class AdjustedBounceRate {
 
 	public $version = '2.0.0-develop';
+	public $db_version = '2';
 	public $plugin_base_path = ''; //set in __construct()
 	public $plugin_base_url = ''; //set in __construct()
 	public $plugin_title = 'Adjusted Bounce Rate';
 	public $plugin_slug = 'adjusted-bounce-rate';
 //	public $plugin_options_group = 'pressms'; //Still need this?
 	public $options_key = 'adjusted-bounce-rate-options';
+	public $db_version_options_key = 'adjusted-bounce-rate-db-version';
 	public $text_domain = 'adjusted-bounce-rate';
 	public $minify_js = false;
 
@@ -79,7 +81,8 @@ class AdjustedBounceRate {
 	 */
 	function init() {
 
-		//
+		//Check if db updates need to be run.
+		$this->checkCurrentDBVersion();
 
 	}
 
@@ -156,8 +159,6 @@ class AdjustedBounceRate {
 			//App files.
 			wp_enqueue_script('adjusted-bounce-rate', $this->plugin_base_url . '/js/adjusted-bounce-rate.js',
 				array('backbone', 'rsvp', 'bootstrap'), $this->version, true);
-			wp_enqueue_script('adjusted-bounce-rate/views/PhoneBookTabView', $this->plugin_base_url . '/js/views/PhoneBookTabView.js',
-				array('adjusted-bounce-rate'), $this->version, true);
 			wp_enqueue_script('adjusted-bounce-rate/views/OptionsTabView', $this->plugin_base_url . '/js/views/OptionsTabView.js',
 				array('adjusted-bounce-rate'), $this->version, true);
 
@@ -342,6 +343,137 @@ class AdjustedBounceRate {
 
 
 	/** ---------------------------------------------------------------------------------------
+	 *  DB versioning.
+	 *  -------------------------------------------------------------------------------------*/
+
+	/**
+	 * Do updates if db version is out of date.
+	 *
+	 * @return void
+	 */
+	protected function checkCurrentDBVersion() {
+
+		$db_version = $this->getDBVersion();
+
+		if (version_compare($this->db_version, $db_version, '>')) {
+			$this->updateDBOptionsToLatestVersion();
+		}
+
+	}
+
+	/**
+	 * Returns 0 if no db version found.
+	 *
+	 * @return int
+	 */
+	protected function getDBVersion() {
+
+		if (is_multisite()) {
+			switch_to_blog(1);
+			$db_version = get_option($this->db_version_options_key);
+			restore_current_blog();
+		} else {
+			$db_version = get_option($this->db_version_options_key);
+		}
+
+		return (int) $db_version;
+
+	}
+
+	/**
+	 *
+	 *
+	 * @param   $db_version     int         The db version.
+	 * @return  bool
+	 */
+	protected function setDBVersion($db_version) {
+
+		if (!isset($db_version) || !is_int($db_version)) {
+			return false;
+		}
+
+		if (is_multisite()) {
+			switch_to_blog(1);
+			$updated = update_option($this->db_version_options_key, $db_version);
+			restore_current_blog();
+		} else {
+			$updated = update_option($this->db_version_options_key, $db_version);
+		}
+
+		return $updated;
+
+	}
+
+	/**
+	 * Update options to latest version.
+	 *
+	 * @return void
+	 */
+	public function updateDBOptionsToLatestVersion() {
+
+		switch ($this->db_version) {
+			case 2:
+				$this->updateDBOptionsToV2();
+				break;
+
+			default:
+				//
+
+				break;
+		}
+
+	}
+
+	/**
+	 * Update options to use JSON-encoded string (>2.0.0) instead of serialized PHP arrays (<=1.2.1).
+	 *
+	 * @return void
+	 */
+	public function updateDBOptionsToV2() {
+
+		//Get current options string from db.
+		$options = get_option($this->options_key);
+
+		//Check if a serialized array.
+		if (is_array($options) && count($options) > 0) {
+
+			//Update code_placement data type from db v1.
+			if ($options['code_placement'] == '0') {
+				$options['code_placement'] = 'header';
+			} else if ($options['code_placement'] == '1') {
+				$options['code_placement'] = 'footer';
+			}
+
+			//Create a new OptionsModel instance.
+			$options_v2 = new OptionsModel();
+
+			//Copy the option values from the old serialized array.
+			$options_v2->engagementInterval = $options['engagementInterval'] ? (int) $options['engagementInterval'] : $options_v2->engagementInterval;
+			$options_v2->minimumEngagement = $options['minimumEngagement'] ? (int) $options['minimumEngagement'] : $options_v2->minimumEngagement;
+			$options_v2->maximumEngagement = $options['maximumEngagement'] ? (int) $options['maximumEngagement'] : $options_v2->maximumEngagement;
+			$options_v2->eventCategory = $options['eventCategory'] ? (string) $options['eventCategory'] : $options_v2->eventCategory;
+			$options_v2->eventAction = $options['eventAction'] ? (string) $options['eventAction'] : $options_v2->eventAction;
+			$options_v2->codePlacement = $options['codePlacement'] ? (string) $options['codePlacement'] : $options_v2->codePlacement;
+			$options_v2->debugMode = $options['debugMode'] ? (bool) $options['debugMode'] : $options_v2->debugMode;
+
+			//Save it back to the db as JSON-encoded string.
+			$this->saveOptions($options_v2);
+
+		}
+
+		//Update db version in wp_options.
+		$this->setDBVersion(2);
+
+	}
+
+
+
+
+
+
+
+
+	/** ---------------------------------------------------------------------------------------
 	 *  Security.
 	 *  -------------------------------------------------------------------------------------*/
 
@@ -366,56 +498,8 @@ class AdjustedBounceRate {
 
 
 	/** ---------------------------------------------------------------------------------------
-	 *  User meta.
+	 *  Other.
 	 *  -------------------------------------------------------------------------------------*/
-
-	/**
-	 * 
-	 * 
-	 * @param $user
-	 */
-	function add_user_profile_fields($user) {
-		?>
-		<h3><?php _e('Adjusted Bounce Rate User Options', $this->plugin_slug); ?></h3>
-
-		<table class="form-table">
-			<tr>
-				<th>
-					<label for="abr_phone_number"><?php _e('Mobile Phone Number', $this->text_domain); ?></label>
-				</th>
-				<td>
-					<input type="text" name="abr_phone_number" id="abr_phone_number" value="<?php echo esc_attr( get_the_author_meta( 'abr_phone_number', $user->ID ) ); ?>" class="regular-text" />
-					<br>
-					<span class="description">
-						Enter a valid mobile phone number to receive SMS text notifications when there is activity on your posts (e.g., new comments and replies).
-						<br>
-						For example, enter "<em>(555) 123-4567</em>", or "<em>+15551234567</em>".
-					</span>
-				</td>
-			</tr>
-		</table>
-		<?php
-	}
-
-	/**
-	 * 
-	 * 
-	 * @param $user_id
-	 */
-	function save_user_profile_fields($user_id) {
-
-		//Check permissions.
-		if (!current_user_can('edit_user', $user_id)) {
-			return;
-		}
-
-		//Get input.
-		$phone_number = sanitize_text_field($_POST['abr_phone_number']);
-
-		//Update user meta.
-		update_user_meta($user_id, 'abr_phone_number', $phone_number);
-
-	}
 
 	/**
 	 *

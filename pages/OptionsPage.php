@@ -37,11 +37,9 @@ class OptionsPage {
 
 					<ul id="main_nav" class="nav nav-tabs" role="tablist">
 						<li role="presentation" class="active"><a href="#OptionsTab" aria-controls="OptionsTab" role="tab" data-toggle="tab">Options</a></li>
-						<?php /*<li role="presentation"><a href="#PhoneBookTab" aria-controls="PhoneBookTab" role="tab" data-toggle="tab">Phone Book</a></li>*/ ?>
 					</ul>
 					<div class="tab-content">
 						<div id="OptionsTab" role="tabpanel" class="tab-pane active"></div>
-						<?php /*<div id="PhoneBookTab" role="tabpanel" class="tab-pane"></div>*/ ?>
 					</div>
 
 				</div>
@@ -57,20 +55,6 @@ class OptionsPage {
 		 * Underscore templates
 		 */
 		?>
-
-		<?php /* PhoneBookTabView */ ?>
-		<script type="text/template" id="PhoneBookTabView">
-
-			<div class="col-md-6">
-
-				<p>
-					Users with mobile phone numbers saved to their profiles are listed below.
-				</p>
-
-
-			</div>
-
-		</script>
 
 		<?php /* OptionsTabView */ ?>
 		<script type="text/template" id="OptionsTabView">
@@ -115,14 +99,14 @@ class OptionsPage {
 						<label for="eventCategory" class="col-sm-3 control-label">Event Category</label>
 						<div class="col-sm-9">
 							<input id="eventCategory" type="text" class="form-control" placeholder="" autocomplete="off" maxlength="100" aria-describedby="" value="<%= pluginOptions ? pluginOptions.eventCategory : '' %>">
-							<span class="help-block">Read more about <a href="https://support.google.com/analytics/answer/1033068?hl=en" target="_blank">event tracking in GA</a>.&nbsp;&nbsp;<em>Default: engagement-hit</em></span>
+							<span class="help-block">Read more about <a href="https://support.google.com/analytics/answer/1033068?hl=en" target="_blank">event tracking in GA</a>.&nbsp;&nbsp;<em>Default: "engagement-hit"</em></span>
 						</div>
 					</div>
 					<div class="row form-group">
 						<label for="eventAction" class="col-sm-3 control-label">Event Action</label>
 						<div class="col-sm-9">
 							<input id="eventAction" type="text" class="form-control" placeholder="" autocomplete="off" maxlength="100" aria-describedby="" value="<%= pluginOptions ? pluginOptions.eventAction : '' %>">
-							<span class="help-block">Read more about <a href="https://support.google.com/analytics/answer/1033068?hl=en" target="_blank">event tracking in GA</a>.&nbsp;&nbsp;<em>Default: engagement-hit</em></span>
+							<span class="help-block">Read more about <a href="https://support.google.com/analytics/answer/1033068?hl=en" target="_blank">event tracking in GA</a>.&nbsp;&nbsp;<em>Default: "time-on-page"</em></span>
 						</div>
 					</div>
 					<div class="form-group">
@@ -132,18 +116,21 @@ class OptionsPage {
 
 					</div>
 					<div class="row form-group">
-						<label for="codePlacement" class="col-sm-3 control-label">Code Placement</label>
+						<label for="" class="col-sm-3 control-label">Code Placement</label>
 						<div class="col-sm-9">
-							<input id="codePlacement" type="text" class="form-control" placeholder="" autocomplete="off" maxlength="100" aria-describedby="" value="<%= pluginOptions ? pluginOptions.codePlacement : '' %>">
+							<input id="codePlacementHeader" name="codePlacement" type="radio" aria-describedby="" value="header"<%= pluginOptions ? (pluginOptions.codePlacement === 'header' ? ' checked' : '') : '' %>> Header<br>
+							<input id="codePlacementFooter" name="codePlacement" type="radio" aria-describedby="" value="footer"<%= pluginOptions ? (pluginOptions.codePlacement === 'footer' ? ' checked' : '') : '' %>> Footer <em>(recommended)</em>
 							<span class="help-block">Where should the tracking code be rendered in the HTML?</span>
 						</div>
 					</div>
 					<div class="row form-group">
-						<div class="col-sm-offset-3 col-sm-9">
+						<label for="debugMode" class="col-sm-3 control-label">Debug Mode</label>
+						<div class="col-sm-9">
 							<div class="checkbox">
 								<label>
-									<input id="debugMode" type="checkbox"<%= pluginOptions ? (pluginOptions.debugMode === true || pluginOptions.debugMode === 'true' ? ' checked' : '') : '' %>> Debug Mode
+									<input id="debugMode" type="checkbox"<%= pluginOptions ? (pluginOptions.debugMode === true || pluginOptions.debugMode === 'true' ? ' checked' : '') : '' %>> Enabled
 								</label>
+								<span class="help-block">Debug mode should only be enabled in production while troubleshooting!</span>
 							</div>
 						</div>
 					</div>

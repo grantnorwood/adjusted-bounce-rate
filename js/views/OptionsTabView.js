@@ -51,7 +51,7 @@
 		/**
 		 * Initial phone numbers.
 		 */
-		incomingPhoneNumbers: null,
+		//incomingPhoneNumbers: null,
 
 
 
@@ -67,11 +67,17 @@
 			var self = this;
 
 			var options = {
-				'twilioAccountSid' : self.$('#twilioAccountSid').val(),
-				'twilioAuthToken' : self.$('#twilioAuthToken').val(),
-				'defaultFromPhoneNumber' : self.$('#defaultFromPhoneNumber > option:selected').val(),
-				'notifyAuthorNewComment' : self.$('#notifyAuthorNewComment').is(':checked')
+				'engagementInterval' : parseInt(self.$('#engagementInterval').val(), 10),
+				'minimumEngagement' : parseInt(self.$('#minimumEngagement').val(), 10),
+				'maximumEngagement' : parseInt(self.$('#maximumEngagement').val(), 10),
+				'eventCategory' : self.$('#eventCategory').val(),
+				'eventAction' : self.$('#eventAction').val(),
+				'codePlacement' : self.$('[name="codePlacement"]:selected').val(),
+				'debugMode' : self.$('#debugMode').is(':checked')
 			};
+
+			//DEBUG
+			alert(JSON.stringify(options)); return;
 
 			adjustedBounceRate.forms.buttonOnSaveBegin('#saveBtn');
 
@@ -108,49 +114,6 @@
 			adjustedBounceRate.forms.buttonOnSaveFail('#saveBtn');
 
 			adjustedBounceRate.showAlert(errors, 'error');
-
-		},
-
-		checkTwilioCredentialsSuccess: function(phoneNumbers) {
-
-
-			adjustedBounceRate.forms.textboxSuccess('#twilioAccountSid');
-			adjustedBounceRate.forms.textboxSuccess('#twilioAuthToken');
-
-			//Show phone numbers.
-			this.showPhoneNumbers(phoneNumbers, (adjustedBounceRate.pluginOptions ? adjustedBounceRate.pluginOptions.defaultFromPhoneNumber : null));
-
-		},
-
-		checkTwilioCredentialsFail: function(errors) {
-
-			adjustedBounceRate.forms.textboxError('#twilioAccountSid');
-			adjustedBounceRate.forms.textboxError('#twilioAuthToken');
-
-			adjustedBounceRate.showAlert(errors, 'error');
-
-		},
-
-		showPhoneNumbers: function(phoneNumbers, defaultFromPhoneNumber) {
-
-			var select = this.$('#defaultFromPhoneNumber');
-
-			if (_.isArray(phoneNumbers)) {
-
-				//Populate options.
-				var optionsHtml = ['<option value=""></option>'];
-
-				_.each(phoneNumbers, function(phoneNumber) {
-					optionsHtml.push('<option value="' + phoneNumber + '"');
-					if (phoneNumber && phoneNumber === defaultFromPhoneNumber) {
-						optionsHtml.push(' selected');
-					}
-					optionsHtml.push('>' + phoneNumber + '</option>');
-				});
-
-				select.empty().html(optionsHtml.join(''));
-
-			}
 
 		}
 

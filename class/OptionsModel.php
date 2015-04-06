@@ -15,33 +15,54 @@ class OptionsModel {
 	 *  -------------------------------------------------------------------------------------*/
 
 	/**
-	 * The Twilio account SID.
+	 *
+	 *
+	 * @var int
+	 */
+	public $engagementInterval = 10;
+
+	/**
+	 *
+	 *
+	 * @var int
+	 */
+	public $minimumEngagement = 10;
+
+	/**
+	 *
+	 *
+	 * @var int
+	 */
+	public $maximumEngagement = 1200;
+
+	/**
+	 *
 	 *
 	 * @var string
 	 */
-	public $twilioAccountSid = null;
+	public $eventCategory = 'engagement-hit';
 
 	/**
-	 * The Twilio auth token.
+	 *
 	 *
 	 * @var string
 	 */
-	public $twilioAuthToken = null;
+	public $eventAction = 'time-on-page';
 
 	/**
-	 * The default Twilio phone number to send from.
+	 *
 	 *
 	 * @var string
 	 */
-	public $defaultFromPhoneNumber = null;
+	public $codePlacement = 'footer';
 
 	/**
-	 * When true, authors are notified via SMS when new comments are posted.  The author must have an SMS number saved to their user profile.
+	 *
 	 *
 	 * @var boolean
-	 * @default true
+	 * @default false
 	 */
-	public $notifyAuthorNewComment = true;
+	public $debugMode = false;
 
 
 
@@ -80,10 +101,13 @@ class OptionsModel {
 
 		$optionsModel = new OptionsModel();
 
-		$optionsModel->twilioAccountSid = $jsonObject->twilioAccountSid ? $jsonObject->twilioAccountSid : $optionsModel->twilioAccountSid;
-		$optionsModel->twilioAuthToken = $jsonObject->twilioAuthToken ? $jsonObject->twilioAuthToken : $optionsModel->twilioAuthToken;
-		$optionsModel->defaultFromPhoneNumber = $jsonObject->defaultFromPhoneNumber ? $jsonObject->defaultFromPhoneNumber : $optionsModel->defaultFromPhoneNumber;
-		$optionsModel->notifyAuthorNewComment = $jsonObject->notifyAuthorNewComment ? $jsonObject->notifyAuthorNewComment : $optionsModel->notifyAuthorNewComment;
+		$optionsModel->engagementInterval = $jsonObject->engagementInterval ? (int) $jsonObject->engagementInterval : $optionsModel->engagementInterval;
+		$optionsModel->minimumEngagement = $jsonObject->minimumEngagement ? (int) $jsonObject->minimumEngagement : $optionsModel->minimumEngagement;
+		$optionsModel->maximumEngagement = $jsonObject->maximumEngagement ? (int) $jsonObject->maximumEngagement : $optionsModel->maximumEngagement;
+		$optionsModel->eventCategory = $jsonObject->eventCategory ? (string) $jsonObject->eventCategory : $optionsModel->eventCategory;
+		$optionsModel->eventAction = $jsonObject->eventAction ? (string) $jsonObject->eventAction : $optionsModel->eventAction;
+		$optionsModel->codePlacement = $jsonObject->codePlacement ? (string) $jsonObject->codePlacement : $optionsModel->codePlacement;
+		$optionsModel->debugMode = $jsonObject->debugMode ? (bool) $jsonObject->debugMode : $optionsModel->debugMode;
 
 		return $optionsModel;
 

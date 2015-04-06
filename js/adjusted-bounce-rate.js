@@ -22,9 +22,8 @@
 			errorMsg: 'Uh oh, an error occurred.',
 			ajaxUrl: null,
 			pluginOptions: null,
-			phoneBookEntries: null,
 
-			phoneBookTabView: null,
+			//Views.
 			optionsTabView: null,
 
 
@@ -38,11 +37,8 @@
 				//Init some properties.
 				this.ajaxUrl = _adjustedBounceRate.ajaxUrl;
 				this.pluginOptions = _adjustedBounceRate.initialOptions;
-				this.phoneBookEntries = _adjustedBounceRate.phoneBookEntries;
 
 				//Init views.
-				//this.phoneBookTabView = new window.adjustedBounceRate.views.PhoneBookTabView();
-
 				this.optionsTabView = new window.adjustedBounceRate.views.OptionsTabView();
 
 			},
@@ -338,112 +334,6 @@
 					if (glyph) {
 						glyph.remove();
 					}
-
-				}
-
-			},
-
-
-
-
-			/* ----------------------------------------------------------------------------------------------------------
-			 * Twilio.
-			 * ---------------------------------------------------------------------------------------------------------- */
-
-			/**
-			 *
-			 */
-			twilio: {
-
-				/**
-				 *
-				 *
-				 * @param       accountSID      string
-				 * @param       authToken       string
-				 * @returns     {RSVP.Promise}
-				 */
-				checkCredentials: function (accountSID, authToken) {
-
-					return new RSVP.Promise(function(resolve, reject) {
-
-						if (_.isEmpty(accountSID) || _.isEmpty(authToken)) {
-							reject(['accountSID or authToken parameters were missing.'])
-						}
-
-						var request = $.ajax({
-							url: adjustedBounceRate.ajaxUrl,
-							type: "POST",
-							data: { action: 'abr_check_twilio_credentials', account_sid: accountSID, auth_token: authToken },
-							dataType: "json"
-						});
-
-						request.done(function(response) {
-
-							//Check for errors.
-							if ($.isArray(response.errors) && response.errors.length > 0) {
-								reject(response.errors);
-								return;
-							}
-
-							var phoneNumbers = response.data;
-
-							resolve(phoneNumbers);
-
-						});
-
-						request.fail(function(jqXHR, textStatus, errorMsg) {
-
-							reject([errorMsg]);
-
-						});
-
-					});
-
-				},
-
-				/**
-				 *
-				 *
-				 * @param       toPhoneNumber       string
-				 * @param       message             string
-				 * @returns     {RSVP.Promise}
-				 */
-				sendSMS: function (toPhoneNumber, message) {
-
-					return new RSVP.Promise(function(resolve, reject) {
-
-						if (_.isEmpty(toPhoneNumber) || _.isEmpty(message)) {
-							reject(['toPhoneNumber or message parameters were missing.'])
-						}
-
-						var request = $.ajax({
-							url: adjustedBounceRate.ajaxUrl,
-							type: "POST",
-							data: { action: 'abr_send_sms', toPhoneNumber: toPhoneNumber, message: message },
-							dataType: "json"
-						});
-
-						request.done(function(response) {
-
-							//Check for errors.
-							if ($.isArray(response.errors) && response.errors.length > 0) {
-								reject(response.errors);
-								return;
-							}
-
-							var userMessages = response.data;
-
-							resolve(userMessages);
-
-						});
-
-						request.fail(function(jqXHR, textStatus, errorMsg) {
-
-							reject([errorMsg]);
-
-						});
-
-					});
 
 				}
 

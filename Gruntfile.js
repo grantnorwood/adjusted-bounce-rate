@@ -31,7 +31,6 @@ module.exports = function (grunt) {
 					'js/adjusted-bounce-rate.dist.js': [
 						'bower_components/rsvp/rsvp.min.js',
 						'bower_components/bootstrap/dist/js/bootstrap.min.js',
-						'js/views/PhoneBookTabView.js',
 						'js/views/OptionsTabView.js',
 						'js/adjusted-bounce-rate.js'
 					]

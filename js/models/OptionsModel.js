@@ -24,10 +24,13 @@
 
 		defaults : {
 
-			'twilioAccountSid' : null,
-			'twilioAuthToken' : null,
-			'defaultFromPhoneNumber' : null,
-			'notifyAuthorNewComment' : true
+			'engagementInterval' : 10,
+			'minimumEngagement' : 10,
+			'maximumEngagement' : 1200,
+			'eventCategory' : 'engagement-hit',
+			'eventAction' : 'time-on-page',
+			'codePlacement' : 'footer',
+			'debugMode' : false
 
 		},
 
