@@ -3,10 +3,10 @@
 /**
  * Plugin Name: Adjusted Bounce Rate
  *
- * Description: A well-designed plugin that helps track the Adjusted Bounce Rate in Google Analytics.
+ * Description: A well-designed plugin that improves the accuracy of your bounce rate, time on page, and session duration metrics in Google Analytics.
  *
  * Plugin URI: http://wordpress.org/extend/plugins/adjusted-bounce-rate/
- * Version: 1.2.0
+ * Version: 1.2.1
  * Author: Grant K Norwood
  * Author URI: http://grantnorwood.com/
  * License: GPLv2
@@ -25,7 +25,7 @@ $GLOBALS['adjusted_bounce_rate'] = new Adjusted_Bounce_Rate;
  * @link http://wordpress.org/extend/plugins/adjusted-bounce-rate/
  * @license http://www.gnu.org/licenses/gpl-2.0.html GPLv2
  * @author Grant K Norwood (http://grantnorwood.com)
- * @copyright Grant K Norwood, 2014
+ * @copyright Grant K Norwood, 2015
  */
 class Adjusted_Bounce_Rate {
 
@@ -42,7 +42,12 @@ class Adjusted_Bounce_Rate {
 	/**
 	 * This plugin's version
 	 */
-	const VERSION = '1.2.0';
+	const VERSION = '1.2.1';
+
+	/**
+	 * The database version
+	 */
+	const DB_VERSION = 1;
 
 
 
@@ -72,7 +77,7 @@ class Adjusted_Bounce_Rate {
 	protected $options = array();
 
 	/**
-	 * This plugin's default options
+	 * This plugin's default options (keep fields and defaults in sync with settings.php).
 	 * @var array
 	 */
 	protected $options_default = array(
@@ -83,6 +88,7 @@ class Adjusted_Bounce_Rate {
         'engagement_event_action' => 'time-on-page',
         'code_placement' => 'footer', //"header" or "footer"
         'minify_js' => true,
+		'debug_mode' => false
 	);
 
 	/**
@@ -91,6 +97,12 @@ class Adjusted_Bounce_Rate {
 	 */
 	protected $option_name;
 
+	/**
+	 * Our option name for storing the database version
+	 * @var string
+	 */
+	protected $db_option_name;
+
 
 
 
@@ -98,9 +110,7 @@ class Adjusted_Bounce_Rate {
 	/**
 	 * Declares the WordPress action and filter callbacks
 	 *
-	 * @return void
-	 * @uses adjusted_bounce_rate::initialize()  to set the object's
-	 *       properties
+	 * @uses adjusted_bounce_rate::initialize()  to set the object's properties
 	 */
 	public function __construct() {
 
@@ -150,6 +160,10 @@ class Adjusted_Bounce_Rate {
 	protected function initialize() {
 
 		$this->option_name = self::ID . '-options';
+		$this->db_option_name = self::ID . '-db-version';
+
+		//Check if db updates need to be run.
+		$this->check_current_db_version();
 
 		$this->get_options();
 
@@ -169,15 +183,21 @@ class Adjusted_Bounce_Rate {
     public function activate() {
 
         if (is_multisite() && !is_network_admin()) {
-            die($this->hsc_utf8(sprintf(__("%s must be activated via the Network Admin interface when WordPress is in multistie network mode.", self::ID), self::NAME)));
+            die($this->hsc_utf8(sprintf(__("%s must be activated via the Network Admin interface when WordPress is in multisite network mode.", self::ID), self::NAME)));
         }
 
-        //Save this plugin's options to the database.
         if (is_multisite()) {
+	        //Switch to main blog.
             switch_to_blog(1);
         }
+
+	    /*
+	    //Save this plugin's options to the database.  If they don't already exist, defaults will be used.
         update_option($this->option_name, $this->options);
+	    */
+
         if (is_multisite()) {
+	        //Switch back.
             restore_current_blog();
         }
 
@@ -190,6 +210,56 @@ class Adjusted_Bounce_Rate {
 	/*
 	 * ===== INTERNAL METHODS ====
 	 */
+
+	/**
+	 * Update options to latest version.
+	 *
+	 * @return void
+	 */
+	public function update_db_options_to_latest_version() {
+
+		switch (self::DB_VERSION) {
+			case 1:
+				$this->update_db_options_to_v1();
+				break;
+
+			default:
+				//
+
+				break;
+		}
+
+	}
+
+	/**
+	 * Update options to latest version.
+	 *
+	 * @return void
+	 */
+	public function update_db_options_to_v1() {
+
+		//Update serialized data types for some options.
+
+		$this->get_options();
+
+		if (isset($this->options)) {
+
+			//code_placement
+			if ($this->options['code_placement'] == '0') {
+				$this->options['code_placement'] = 'header';
+			} else if ($this->options['code_placement'] == '1') {
+				$this->options['code_placement'] = 'footer';
+			}
+
+			//All done, save back to the db.
+			$this->save_options();
+
+		}
+
+		//Update db version in wp_options.
+		$this->set_db_version(1);
+
+	}
 
 	/**
 	 * Sanitizes output via htmlspecialchars() using UTF-8 encoding
@@ -230,6 +300,7 @@ class Adjusted_Bounce_Rate {
 	 * @uses login_security_solution::$options  to hold the data
 	 */
 	protected function get_options() {
+
 		if (is_multisite()) {
 			switch_to_blog(1);
 			$options = get_option($this->option_name);
@@ -237,10 +308,94 @@ class Adjusted_Bounce_Rate {
 		} else {
 			$options = get_option($this->option_name);
 		}
+
 		if (!is_array($options)) {
 			$options = array();
 		}
+
 		$this->options = array_merge($this->options_default, $options);
+
+	}
+
+	/**
+	 * Saves $this->options to the db.
+	 *
+	 * @return  bool
+	 */
+	protected function save_options() {
+
+		if (!isset($this->options)) {
+			return false;
+		}
+
+		if (is_multisite()) {
+			switch_to_blog(1);
+			$updated = update_option($this->option_name, $this->options);
+			restore_current_blog();
+		} else {
+			$updated = update_option($this->option_name, $this->options);
+		}
+
+		return $updated;
+
+	}
+
+	/**
+	 * Do updates if db version is out of date.
+	 *
+	 * @return void
+	 */
+	protected function check_current_db_version() {
+
+		$db_version = $this->get_db_version();
+
+		if (version_compare(self::DB_VERSION, $db_version, '>')) {
+			$this->update_db_options_to_latest_version();
+		}
+
+	}
+
+	/**
+	 * Returns 0 if no db version found.
+	 *
+	 * @return int
+	 */
+	protected function get_db_version() {
+
+		if (is_multisite()) {
+			switch_to_blog(1);
+			$db_version = get_option($this->db_option_name);
+			restore_current_blog();
+		} else {
+			$db_version = get_option($this->db_option_name);
+		}
+
+		return (int) $db_version;
+
+	}
+
+	/**
+	 *
+	 *
+	 * @param   $db_version     int         The db version.
+	 * @return  bool
+	 */
+	protected function set_db_version($db_version) {
+
+		if (!isset($db_version) || !is_int($db_version)) {
+			return false;
+		}
+
+		if (is_multisite()) {
+			switch_to_blog(1);
+			$updated = update_option($this->db_option_name, $db_version);
+			restore_current_blog();
+		} else {
+			$updated = update_option($this->db_option_name, $db_version);
+		}
+
+		return $updated;
+
 	}
 
     /**
@@ -249,7 +404,7 @@ class Adjusted_Bounce_Rate {
     public function init_frontend() {
 
 	    //Only load if Google Analytics for WordPress is loaded.
-	    global $yoast_ga, $yoast_ga_frontend;
+	    global $yoast_ga;
 	    $do_tracking = true;
 
 	    //Check for older versions of Yoast (<= 5.0.6).
@@ -264,7 +419,7 @@ class Adjusted_Bounce_Rate {
 	    }
 
         //Header or footer?
-        if ($this->options['code_placement'] == '0') {
+        if ($this->options['code_placement'] == 'header') {
             //header
             add_action('wp_head', array($this, 'render_code'));
         } else {
@@ -279,13 +434,30 @@ class Adjusted_Bounce_Rate {
      */
     public function render_code() {
 
-        $minify_js = (bool) $this->options["minify_js"];
-        $js_url = plugins_url(Adjusted_Bounce_Rate::ID) . "/js/" . Adjusted_Bounce_Rate::ID . ($minify_js ? ".min" : "") . ".js?v=" . self::VERSION;
+	    $minify_js = (bool) $this->options["minify_js"];
+	    $js_script_srcs = array();
+
+	    if ($minify_js) {
+
+		    array_push($js_script_srcs, plugins_url(Adjusted_Bounce_Rate::ID) . "/js/adjusted-bounce-rate.min.js?v=" . self::VERSION);
+
+	    } else {
+
+		    array_push($js_script_srcs, plugins_url(Adjusted_Bounce_Rate::ID) . "/lib/ba-debug.min.js?v=" . self::VERSION);
+		    array_push($js_script_srcs, plugins_url(Adjusted_Bounce_Rate::ID) . "/js/adjusted-bounce-rate.js?v=" . self::VERSION);
+
+	    }
 
         ?>
 
         <!-- adjusted bounce rate -->
-        <script type="text/javascript" src="<?php echo $js_url; ?>"></script>
+        <?php
+	    foreach ($js_script_srcs as $src) {
+		    ?>
+		    <script type="text/javascript" src="<?php echo $src; ?>"></script>
+		    <?php
+	    }
+	    ?>
         <script type="text/javascript">
             jQuery(document).ready(function() {
                 gkn.AdjustedBounceRate.init({
@@ -293,7 +465,8 @@ class Adjusted_Bounce_Rate {
                     min_engagement_seconds: <?php echo $this->options['min_engagement_seconds']; ?>,
                     max_engagement_seconds: <?php echo $this->options['max_engagement_seconds']; ?>,
                     engagement_event_category: '<?php echo $this->options['engagement_event_category']; ?>',
-                    engagement_event_action: '<?php echo $this->options['engagement_event_action']; ?>'
+                    engagement_event_action: '<?php echo $this->options['engagement_event_action']; ?>',
+	                debug_mode: <?php echo $this->options['debug_mode'] === true ? 'true' : 'false'; ?>
                 });
             });
         </script>
