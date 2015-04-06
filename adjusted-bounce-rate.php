@@ -42,7 +42,7 @@ class Adjusted_Bounce_Rate {
 	/**
 	 * This plugin's version
 	 */
-	const VERSION = '1.2.0';
+	const VERSION = '1.2.1';
 
 
 
@@ -263,7 +263,7 @@ class Adjusted_Bounce_Rate {
 	    }
 
         //Header or footer?
-        if ($this->options['code_placement'] == '0') {
+        if ($this->options['code_placement'] == 'header') {
             //header
             add_action('wp_head', array($this, 'render_code'));
         } else {
@@ -278,13 +278,30 @@ class Adjusted_Bounce_Rate {
      */
     public function render_code() {
 
-        $minify_js = (bool) $this->options["minify_js"];
-        $js_url = plugins_url(Adjusted_Bounce_Rate::ID) . "/js/" . Adjusted_Bounce_Rate::ID . ($minify_js ? ".min" : "") . ".js?v=" . self::VERSION;
+	    $minify_js = (bool) $this->options["minify_js"];
+	    $js_script_srcs = array();
+
+	    if ($minify_js) {
+
+		    array_push($js_script_srcs, plugins_url(Adjusted_Bounce_Rate::ID) . "/lib/ba-debug.min.js?v=" . self::VERSION);
+		    array_push($js_script_srcs, plugins_url(Adjusted_Bounce_Rate::ID) . "/js/adjusted-bounce-rate.js?v=" . self::VERSION);
+
+	    } else {
+
+		    array_push($js_script_srcs, plugins_url(Adjusted_Bounce_Rate::ID) . "/js/adjusted-bounce-rate.min.js?v=" . self::VERSION);
+
+	    }
 
         ?>
 
         <!-- adjusted bounce rate -->
-        <script type="text/javascript" src="<?php echo $js_url; ?>"></script>
+        <?php
+	    foreach ($js_script_srcs as $src) {
+		    ?>
+		    <script type="text/javascript" src="<?php echo $src; ?>"></script>
+		    <?php
+	    }
+	    ?>
         <script type="text/javascript">
             jQuery(document).ready(function() {
                 gkn.AdjustedBounceRate.init({
@@ -293,7 +310,7 @@ class Adjusted_Bounce_Rate {
                     max_engagement_seconds: <?php echo $this->options['max_engagement_seconds']; ?>,
                     engagement_event_category: '<?php echo $this->options['engagement_event_category']; ?>',
                     engagement_event_action: '<?php echo $this->options['engagement_event_action']; ?>',
-	                debug_mode: <?php echo $this->options['debug_mode'] === '1' ? 'true' : 'false'; ?>
+	                debug_mode: <?php echo $this->options['debug_mode'] === true ? 'true' : 'false'; ?>
                 });
             });
         </script>

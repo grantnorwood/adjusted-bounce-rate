@@ -17,9 +17,8 @@ if (typeof gkn === 'undefined' || !gkn) {
     gkn.AdjustedBounceRate = function() {
 
         //Private properties.
-        var version = '1.2.0',
+        var version = '1.2.1',
             sandboxMode = false, //if true, do NOT actually fire the tracking event (disable in production!)
-            options = {},
             startTime,
             elapsedTime,
             timer,
@@ -37,38 +36,41 @@ if (typeof gkn === 'undefined' || !gkn) {
              */
             init: function(_options) {
 
+	            //Init vars.
+	            _self.options = _options;
+
+	            if (_self.options.debug_mode !== true) {
+		            //Turn off debugging.
+		            debug.setLevel(0);
+	            }
+
+	            if (_self.options.debug_mode) {
+		            //Log start.
+		            debug.log('Adjusted_Bounce_Rate.init(): _self.options=' + JSON.stringify(_self.options));
+	            }
+
                 if (
 	                typeof window.pageTracker !== "undefined" //Old urchin tracking
 	                || typeof window._gaq !== "undefined" //Less old ga.js tracking
 	                || typeof window.ga !== "undefined" || typeof window.__gaTracker !== "undefined" //Newer Universal tracking
-	                || options.debug_mode === true //Debug mode, skip detection
+	                //TODO: || options.debug_mode === true //Debug mode, skip detection
                 ) {
-
-                    //Init vars.
-                    options = _options;
-
-	                if (options.debug_mode !== true) {
-		                debug.setLevel(0);
-	                }
-
-                    //Log.
-	                if (options.debug_mode) {
-		                debug.log('Adjusted_Bounce_Rate.init(): options=' + JSON.stringify(options));
-	                }
 
                     //If ajaxify is being used, restart on state change complete event.
                     _self.initAjaxify();
 
                     //Wait to start?
-                    if (options.min_engagement_seconds > 0) {
-                        setTimeout(this.start, options.min_engagement_seconds * 1000);
+                    if (_self.options.min_engagement_seconds > 0) {
+                        setTimeout(this.start, _self.options.min_engagement_seconds * 1000);
                     } else {
                         this.start();
                     }
 
                 } else {
 
-                    debug.log('Adjusted Bounce Rate: GA is not loaded.');
+	                if (_self.options.debug_mode) {
+		                debug.log('Adjusted Bounce Rate: GA is not loaded.');
+	                }
 
                 }
 
@@ -90,7 +92,7 @@ if (typeof gkn === 'undefined' || !gkn) {
              */
             start: function() {
 
-	            if (options.debug_mode) {
+	            if (_self.options.debug_mode) {
                     debug.log('Adjusted_Bounce_Rate.start()');
 	            }
 
@@ -111,15 +113,15 @@ if (typeof gkn === 'undefined' || !gkn) {
              */
             restart: function() {
 
-	            if (options.debug_mode) {
+	            if (_self.options.debug_mode) {
 		            debug.log('Adjusted_Bounce_Rate.restart()');
 	            }
 
                 _self.stop();
 
                 //Wait to start?
-                if (options.min_engagement_seconds > 0) {
-                    setTimeout(this.start, options.min_engagement_seconds * 1000);
+                if (_self.options.min_engagement_seconds > 0) {
+                    setTimeout(this.start, _self.options.min_engagement_seconds * 1000);
                 } else {
                     this.start();
                 }
@@ -133,7 +135,7 @@ if (typeof gkn === 'undefined' || !gkn) {
 
                 var elapsedTime = _self.formatElapsedTime(elapsedSecs);
 
-	            if (options.debug_mode) {
+	            if (_self.options.debug_mode) {
 		            debug.log('Adjusted_Bounce_Rate.stop(): stopped after "' + elapsedTime + '" (' + elapsedSecs + ' seconds).');
 	            }
 
@@ -154,11 +156,11 @@ if (typeof gkn === 'undefined' || !gkn) {
                 var elapsedDiff = _self.dateDiff(elapsedTime, now, 'seconds');
 
                 //Keep tickin'.
-                if (elapsedDiff >= options.engagement_interval_seconds || firstTick === true) {
+                if (elapsedDiff >= _self.options.engagement_interval_seconds || firstTick === true) {
 
                     //Increment the engagement hit counter.
                     hitCount++;
-                    elapsedSecs = hitCount * options.engagement_interval_seconds;
+                    elapsedSecs = hitCount * _self.options.engagement_interval_seconds;
 
                     /*debug.log('Adjusted_Bounce_Rate.tick(): startTime=' + startTime.getTime()
                         + ', elapsedTime=' + elapsedTime.getTime()
@@ -173,7 +175,7 @@ if (typeof gkn === 'undefined' || !gkn) {
                 }
 
                 //Stop the ticking?
-                if (elapsedSecs >= options.max_engagement_seconds) {
+                if (elapsedSecs >= _self.options.max_engagement_seconds) {
 
                     //Stop.
                     _self.stop();
@@ -189,7 +191,7 @@ if (typeof gkn === 'undefined' || !gkn) {
 
                 var elapsedTime = _self.formatElapsedTime(elapsedSecs);
 
-	            if (options.debug_mode) {
+	            if (_self.options.debug_mode) {
 		            debug.log('Adjusted_Bounce_Rate.trackEvent(): ' + hitCount + ' hits' + ', elapsedSecs=' + elapsedSecs + ', elapsedTime=' + elapsedTime);
 	            }
 
@@ -212,8 +214,8 @@ if (typeof gkn === 'undefined' || !gkn) {
 	                    //Old Urchin.js tracking.
 
                         window.pageTracker._trackEvent(
-                            options.engagement_event_category,
-                            options.engagement_event_action,
+	                        _self.options.engagement_event_category,
+	                        _self.options.engagement_event_action,
                             elapsedTime,
                             elapsedSecs || 0
                         );
@@ -224,8 +226,8 @@ if (typeof gkn === 'undefined' || !gkn) {
 
                         window._gaq.push([
                             '_trackEvent',
-                            options.engagement_event_category,
-                            options.engagement_event_action,
+	                        _self.options.engagement_event_category,
+	                        _self.options.engagement_event_action,
                             elapsedTime,
                             elapsedSecs || 0
                         ]);
@@ -236,8 +238,8 @@ if (typeof gkn === 'undefined' || !gkn) {
 
 	                    ga('send', {
 		                    'hitType': 'event',                                     // Required.
-		                    'eventCategory': options.engagement_event_category,     // Required.
-		                    'eventAction': options.engagement_event_action,         // Required.
+		                    'eventCategory': _self.options.engagement_event_category,     // Required.
+		                    'eventAction': _self.options.engagement_event_action,         // Required.
 		                    'eventLabel': elapsedTime,
 		                    'eventValue': elapsedSecs || 0
 	                    });
@@ -248,8 +250,8 @@ if (typeof gkn === 'undefined' || !gkn) {
 
 	                    __gaTracker('send', {
 		                    'hitType': 'event',                                     // Required.
-		                    'eventCategory': options.engagement_event_category,     // Required.
-		                    'eventAction': options.engagement_event_action,         // Required.
+		                    'eventCategory': _self.options.engagement_event_category,     // Required.
+		                    'eventAction': _self.options.engagement_event_action,         // Required.
 		                    'eventLabel': elapsedTime,
 		                    'eventValue': elapsedSecs || 0
 	                    });
