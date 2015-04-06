@@ -44,6 +44,11 @@ class Adjusted_Bounce_Rate {
 	 */
 	const VERSION = '1.2.1';
 
+	/**
+	 * The database version
+	 */
+	const DB_VERSION = 1;
+
 
 
 
@@ -91,6 +96,12 @@ class Adjusted_Bounce_Rate {
 	 * @var string
 	 */
 	protected $option_name;
+
+	/**
+	 * Our option name for storing the database version
+	 * @var string
+	 */
+	protected $db_option_name;
 
 
 
@@ -150,6 +161,9 @@ class Adjusted_Bounce_Rate {
 
 		$this->option_name = self::ID . '-options';
 
+		//Check if db updates need to be run.
+		$this->check_current_db_version();
+
 		$this->get_options();
 
 	}
@@ -171,12 +185,18 @@ class Adjusted_Bounce_Rate {
             die($this->hsc_utf8(sprintf(__("%s must be activated via the Network Admin interface when WordPress is in multisite network mode.", self::ID), self::NAME)));
         }
 
-        //Save this plugin's options to the database.
         if (is_multisite()) {
+	        //Switch to main blog.
             switch_to_blog(1);
         }
+
+	    /*
+	    //Save this plugin's options to the database.  If they don't already exist, defaults will be used.
         update_option($this->option_name, $this->options);
+	    */
+
         if (is_multisite()) {
+	        //Switch back.
             restore_current_blog();
         }
 
@@ -189,6 +209,39 @@ class Adjusted_Bounce_Rate {
 	/*
 	 * ===== INTERNAL METHODS ====
 	 */
+
+	/**
+	 * Update options to latest version.
+	 *
+	 * @return void
+	 */
+	public function update_db_options_to_latest_version() {
+
+		switch (self::DB_VERSION) {
+			case 1:
+				$this->update_db_options_to_v1();
+				break;
+
+			default:
+				//
+
+				break;
+		}
+
+	}
+
+	/**
+	 * Update options to latest version.
+	 *
+	 * @return void
+	 */
+	public function update_db_options_to_v1() {
+
+
+		//Update db version in wp_options.
+		$this->set_db_version(1);
+
+	}
 
 	/**
 	 * Sanitizes output via htmlspecialchars() using UTF-8 encoding
@@ -229,6 +282,7 @@ class Adjusted_Bounce_Rate {
 	 * @uses login_security_solution::$options  to hold the data
 	 */
 	protected function get_options() {
+
 		if (is_multisite()) {
 			switch_to_blog(1);
 			$options = get_option($this->option_name);
@@ -236,10 +290,71 @@ class Adjusted_Bounce_Rate {
 		} else {
 			$options = get_option($this->option_name);
 		}
+
 		if (!is_array($options)) {
 			$options = array();
 		}
+
 		$this->options = array_merge($this->options_default, $options);
+
+	}
+
+	/**
+	 * Do updates if db version is out of date.
+	 *
+	 * @return void
+	 */
+	protected function check_current_db_version() {
+
+		$db_version = $this->get_db_version();
+
+		if (version_compare(self::DB_VERSION, $db_version, '>')) {
+			$this->update_db_options_to_latest_version();
+		}
+
+	}
+
+	/**
+	 * Returns 0 if no db version found.
+	 *
+	 * @return int
+	 */
+	protected function get_db_version() {
+
+		if (is_multisite()) {
+			switch_to_blog(1);
+			$db_version = get_option($this->db_option_name);
+			restore_current_blog();
+		} else {
+			$db_version = get_option($this->db_option_name);
+		}
+
+		return (int) $db_version;
+
+	}
+
+	/**
+	 *
+	 *
+	 * @param   $db_version     int         The db version.
+	 * @return  bool
+	 */
+	protected function set_db_version($db_version) {
+
+		if (!isset($db_version) || !is_int($db_version)) {
+			return false;
+		}
+
+		if (is_multisite()) {
+			switch_to_blog(1);
+			$updated = update_option($this->db_option_name, $db_version);
+			restore_current_blog();
+		} else {
+			$updated = update_option($this->db_option_name, $db_version);
+		}
+
+		return $updated;
+
 	}
 
     /**

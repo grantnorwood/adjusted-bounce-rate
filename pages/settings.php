@@ -300,6 +300,12 @@ class Adjusted_Bounce_Rate_Settings_Page extends Adjusted_Bounce_Rate {
 		}
 
 		echo '<h2>' . $this->hsc_utf8($this->text_settings) . '</h2>';
+
+
+		$db_version = $this->get_db_version();
+		echo "<p><em>DB Version: $db_version</em></p>";
+
+
 		echo '<form action="' . $this->hsc_utf8($this->form_action) . '" method="post">' . "\n";
 		settings_fields($this->option_name);
 		do_settings_sections(self::ID);
