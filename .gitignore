@@ -1,2 +1,4 @@
 .idea
 node_modules/
+js/*.min.js
+js/*.concat.js
