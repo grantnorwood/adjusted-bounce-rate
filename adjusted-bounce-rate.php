@@ -160,6 +160,7 @@ class Adjusted_Bounce_Rate {
 	protected function initialize() {
 
 		$this->option_name = self::ID . '-options';
+		$this->db_option_name = self::ID . '-db-version';
 
 		//Check if db updates need to be run.
 		$this->check_current_db_version();
@@ -237,6 +238,23 @@ class Adjusted_Bounce_Rate {
 	 */
 	public function update_db_options_to_v1() {
 
+		//Update serialized data types for some options.
+
+		$this->get_options();
+
+		if (isset($this->options)) {
+
+			//code_placement
+			if ($this->options['code_placement'] == '0') {
+				$this->options['code_placement'] = 'header';
+			} else if ($this->options['code_placement'] == '1') {
+				$this->options['code_placement'] = 'footer';
+			}
+
+			//All done, save back to the db.
+			$this->save_options();
+
+		}
 
 		//Update db version in wp_options.
 		$this->set_db_version(1);
@@ -296,6 +314,29 @@ class Adjusted_Bounce_Rate {
 		}
 
 		$this->options = array_merge($this->options_default, $options);
+
+	}
+
+	/**
+	 * Saves $this->options to the db.
+	 *
+	 * @return  bool
+	 */
+	protected function save_options() {
+
+		if (!isset($this->options)) {
+			return false;
+		}
+
+		if (is_multisite()) {
+			switch_to_blog(1);
+			$updated = update_option($this->option_name, $this->options);
+			restore_current_blog();
+		} else {
+			$updated = update_option($this->option_name, $this->options);
+		}
+
+		return $updated;
 
 	}
 
@@ -398,12 +439,12 @@ class Adjusted_Bounce_Rate {
 
 	    if ($minify_js) {
 
-		    array_push($js_script_srcs, plugins_url(Adjusted_Bounce_Rate::ID) . "/lib/ba-debug.min.js?v=" . self::VERSION);
-		    array_push($js_script_srcs, plugins_url(Adjusted_Bounce_Rate::ID) . "/js/adjusted-bounce-rate.js?v=" . self::VERSION);
+		    array_push($js_script_srcs, plugins_url(Adjusted_Bounce_Rate::ID) . "/js/adjusted-bounce-rate.min.js?v=" . self::VERSION);
 
 	    } else {
 
-		    array_push($js_script_srcs, plugins_url(Adjusted_Bounce_Rate::ID) . "/js/adjusted-bounce-rate.min.js?v=" . self::VERSION);
+		    array_push($js_script_srcs, plugins_url(Adjusted_Bounce_Rate::ID) . "/lib/ba-debug.min.js?v=" . self::VERSION);
+		    array_push($js_script_srcs, plugins_url(Adjusted_Bounce_Rate::ID) . "/js/adjusted-bounce-rate.js?v=" . self::VERSION);
 
 	    }
 
