@@ -15,7 +15,6 @@ class AdjustedBounceRate {
 	public $plugin_base_url = ''; //set in __construct()
 	public $plugin_title = 'Adjusted Bounce Rate';
 	public $plugin_slug = 'adjusted-bounce-rate';
-//	public $plugin_options_group = 'pressms'; //Still need this?
 	public $options_key = 'adjusted-bounce-rate-options';
 	public $db_version_options_key = 'adjusted-bounce-rate-db-version';
 	public $text_domain = 'adjusted-bounce-rate';
@@ -45,7 +44,8 @@ class AdjustedBounceRate {
 
 		} else {
 
-			//Not admin.
+			//Not admin.  Init front-end.
+			add_action('init', array(&$this, 'init_frontend'));
 
 		}
 
@@ -491,6 +491,90 @@ class AdjustedBounceRate {
 
 	}
 
+
+
+
+
+
+
+
+	/** ---------------------------------------------------------------------------------------
+	 *  Front-end.
+	 *  -------------------------------------------------------------------------------------*/
+
+	/**
+	 * Output the embed code.
+	 */
+	public function init_frontend() {
+
+		//Only load if Google Analytics for WordPress is loaded.
+		global $yoast_ga;
+		$do_tracking = true;
+
+		//Check for older versions of Yoast (<= 5.0.6).
+		if (isset($yoast_ga) && $yoast_ga->do_tracking() === false) {
+			$do_tracking = false;
+		}
+
+		//TODO: Find a way to check if tracking should be loaded or not for Yoast GA plugin >= 5.0.7.
+
+		if (!$do_tracking) {
+			return;
+		}
+
+		//Header or footer?
+		$options = $this->getOptions();
+		
+		if ($options->codePlacement == 'header') {
+			//header
+			add_action('wp_head', array($this, 'render_code'));
+		} else {
+			//footer
+			add_action('wp_footer', array($this, 'render_code'));
+		}
+
+	}
+
+	/**
+	 * Output the embed code.
+	 */
+	public function render_code() {
+
+		$options = $this->getOptions();
+
+		$js_script_srcs = array();
+
+		if ($this->minify_js) {
+
+			array_push($js_script_srcs, $this->plugin_base_url . "/js/adjusted-bounce-rate-frontend.min.js?v=" . $this->version);
+
+		} else {
+
+			array_push($js_script_srcs, $this->plugin_base_url . "/lib/ba-debug.min.js?v=" . $this->version);
+			array_push($js_script_srcs, $this->plugin_base_url . "/js/adjusted-bounce-rate-frontend.js?v=" . $this->version);
+
+		}
+
+		?>
+
+		<!-- adjusted bounce rate -->
+		<?php
+		foreach ($js_script_srcs as $src) {
+			?>
+			<script type="text/javascript" src="<?php echo $src; ?>"></script>
+		<?php
+		}
+		?>
+		<script type="text/javascript">
+			jQuery(document).ready(function() {
+				gkn.AdjustedBounceRate.init(<?php echo $options->toJSON() ?>);
+			});
+		</script>
+		<!-- end adjusted bounce rate -->
+
+	<?php
+
+	}
 
 
 
