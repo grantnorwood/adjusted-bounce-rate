@@ -1,4 +1,4 @@
-module.exports = function (grunt) {
+	module.exports = function (grunt) {
 
 	grunt.initConfig({
 		pkg: grunt.file.readJSON('package.json'),
@@ -28,12 +28,14 @@ module.exports = function (grunt) {
 			js: {
 				files: {
 					'js/adjusted-bounce-rate.concat.js': [
+						'lib/ba-debug.min.js',
 						'bower_components/rsvp/rsvp.min.js',
 						'bower_components/bootstrap/dist/js/bootstrap.min.js',
-						'js/views/OptionsTabView.js',
-						'js/adjusted-bounce-rate.js'
+						'js/adjusted-bounce-rate.js',
+						'js/views/OptionsTabView.js'
 					],
 					'js/adjusted-bounce-rate-frontend.concat.js': [
+						'lib/ba-debug.min.js',
 						'js/adjusted-bounce-rate-frontend.js'
 					]
 				}

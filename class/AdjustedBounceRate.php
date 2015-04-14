@@ -18,7 +18,7 @@ class AdjustedBounceRate {
 	public $options_key = 'adjusted-bounce-rate-options';
 	public $db_version_options_key = 'adjusted-bounce-rate-db-version';
 	public $text_domain = 'adjusted-bounce-rate';
-	public $minify_js = false;
+	public $minify_js = true;
 
 	/**
 	 * Constructor.
@@ -146,7 +146,7 @@ class AdjustedBounceRate {
 			//One big js file with libs and app code.
 			wp_enqueue_script('adjusted-bounce-rate',
 				$this->plugin_base_url . '/js/adjusted-bounce-rate.dist.js',
-				array('jquery', 'backbone', 'rsvp'), $this->version, true);
+				array('jquery', 'backbone'), $this->version, true);
 
 		} else {
 
@@ -546,7 +546,7 @@ class AdjustedBounceRate {
 
 		if ($this->minify_js) {
 
-			array_push($js_script_srcs, $this->plugin_base_url . "/js/adjusted-bounce-rate-frontend.min.js?v=" . $this->version);
+			array_push($js_script_srcs, $this->plugin_base_url . "/js/adjusted-bounce-rate-frontend.dist.js?v=" . $this->version);
 
 		} else {
 
