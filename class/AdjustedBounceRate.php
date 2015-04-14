@@ -91,8 +91,39 @@ class AdjustedBounceRate {
 	 */
 	function admin_init() {
 
-		//
+		//Plugin action links.
+		if (is_multisite()) {
+			$admin_menu = 'network_admin_menu';
+			//$admin_notices = 'network_admin_notices';
+			$plugin_action_links = 'network_admin_plugin_action_links_adjusted-bounce-rate/adjusted-bounce-rate.php';
+		} else {
+			$admin_menu = 'admin_menu';
+			//$admin_notices = 'admin_notices';
+			$plugin_action_links = 'plugin_action_links_adjusted-bounce-rate/adjusted-bounce-rate.php';
+		}
 
+		add_filter($plugin_action_links, array(&$this, 'plugin_action_links'));
+
+
+	}
+
+	/**
+	 * A filter to add a "Settings" link in this plugin's description
+	 *
+	 * NOTE: This method is automatically called by WordPress for each
+	 * plugin being displayed on WordPress' Plugins admin page.
+	 *
+	 * @param array $links  the links generated thus far
+	 * @return array
+	 */
+	public function plugin_action_links($links) {
+		//TODO: Fix $this->page_options so that it detects if currently in multi-site.
+		if (empty($this->page_options)) {
+			$this->page_options = 'options-general.php';
+		}
+		$links[] =
+			"<a href=\"" . $this->page_options . "?page=" . $this->plugin_slug . "\">" . __('Settings') . "</a>";
+		return $links;
 	}
 
 	/**
