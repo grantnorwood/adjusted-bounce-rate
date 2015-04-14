@@ -23,19 +23,40 @@ module.exports = function (grunt) {
 					grunt.util.linefeed,
 				banner: '/*! <%= pkg.name %> - v<%= pkg.version %> - ' +
 					'<%= grunt.template.today("yyyy-mm-dd") %> */' +
-					grunt.util.linefeed +
 					grunt.util.linefeed
 			},
 			js: {
 				files: {
-					'js/adjusted-bounce-rate.dist.js': [
+					'js/adjusted-bounce-rate.concat.js': [
 						'bower_components/rsvp/rsvp.min.js',
 						'bower_components/bootstrap/dist/js/bootstrap.min.js',
 						'js/views/OptionsTabView.js',
 						'js/adjusted-bounce-rate.js'
+					],
+					'js/adjusted-bounce-rate-frontend.concat.js': [
+						'js/adjusted-bounce-rate-frontend.js'
 					]
 				}
 			}
+		},
+
+		uglify: {
+			options: {
+				banner: '/*! <%= pkg.name %> - v<%= pkg.version %> - ' +
+					'<%= grunt.template.today("yyyy-mm-dd") %> */' +
+					grunt.util.linefeed,
+				mangle: false
+			},
+			dist: {
+				files: {
+					'js/adjusted-bounce-rate.dist.js': 'js/adjusted-bounce-rate.concat.js',
+					'js/adjusted-bounce-rate-frontend.dist.js': 'js/adjusted-bounce-rate-frontend.concat.js'
+				}
+			}
+		},
+
+		clean: {
+			dist: ['js/*.concat.js']
 		},
 
 		watch: {
@@ -52,6 +73,7 @@ module.exports = function (grunt) {
 			js: {
 				files: [
 					'js/**/*.js',
+					'!js/**/*.concat.js',
 					'!js/**/*.dist.js'
 				],
 				tasks: ['concat']
@@ -60,12 +82,14 @@ module.exports = function (grunt) {
 	});
 
 	//Load tasks.
-	grunt.loadNpmTasks('grunt-contrib-less');
+	grunt.loadNpmTasks('grunt-contrib-clean');
 	grunt.loadNpmTasks('grunt-contrib-concat');
+	grunt.loadNpmTasks('grunt-contrib-less');
+	grunt.loadNpmTasks('grunt-contrib-uglify');
 	grunt.loadNpmTasks('grunt-contrib-watch');
 
 	//Register tasks.
-	grunt.registerTask('build', ['less', 'concat']);
+	grunt.registerTask('build', ['less', 'concat', 'uglify', 'clean']);
 	grunt.registerTask('dist', ['build']);
 	grunt.registerTask('default', ['build', 'watch']);
 
